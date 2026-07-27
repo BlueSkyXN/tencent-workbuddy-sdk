@@ -494,7 +494,7 @@ fn real_main() -> Result<(), String> {
                     .create(
                         &name,
                         &display_name,
-                        package.as_ref().map(|p| p.as_path()),
+                        package.as_deref(),
                         Default::default(),
                     )
                     .map_err(|e| e.to_string())?;
