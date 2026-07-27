@@ -1,4 +1,3 @@
-
 //! Unofficial WorkBuddy / CodeBuddy Enterprise OpenAPI Rust SDK.
 //!
 //! # Build policy

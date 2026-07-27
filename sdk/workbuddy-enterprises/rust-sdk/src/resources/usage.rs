@@ -1,4 +1,3 @@
-
 use crate::client::Client;
 use crate::error::Result;
 use crate::response::{parse_page, ApiResponse, Page};
@@ -59,8 +58,7 @@ impl<'a> UsageResource<'a> {
         let resp = self
             .client
             .post_json("/openapi/usage/members/detail", &[], body)?;
-        let page = if resp.data.get("items").is_some() || resp.data.get("nextPageToken").is_some()
-        {
+        let page = if resp.data.get("items").is_some() || resp.data.get("nextPageToken").is_some() {
             parse_page(resp.data)
         } else {
             Page {

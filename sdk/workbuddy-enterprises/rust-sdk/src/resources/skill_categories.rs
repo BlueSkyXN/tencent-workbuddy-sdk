@@ -1,4 +1,3 @@
-
 use crate::client::Client;
 use crate::error::Result;
 use crate::response::ApiResponse;

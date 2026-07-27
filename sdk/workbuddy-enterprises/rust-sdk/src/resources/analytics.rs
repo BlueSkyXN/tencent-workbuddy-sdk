@@ -1,4 +1,3 @@
-
 use crate::client::{push_q, Client};
 use crate::error::Result;
 use crate::response::{parse_page, ApiResponse, Page};

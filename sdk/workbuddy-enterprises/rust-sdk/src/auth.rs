@@ -1,4 +1,3 @@
-
 use crate::error::{Error, Result};
 use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine as _};
 use reqwest::blocking::Client as HttpClient;
@@ -47,7 +46,9 @@ impl ClientConfig {
         use std::env;
         let mut cfg = Self {
             enterprise_id: env::var("WORKBUDDY_ENTERPRISE_ID").unwrap_or_default(),
-            client_id: env::var("WORKBUDDY_CLIENT_ID").ok().filter(|s| !s.is_empty()),
+            client_id: env::var("WORKBUDDY_CLIENT_ID")
+                .ok()
+                .filter(|s| !s.is_empty()),
             client_secret: env::var("WORKBUDDY_CLIENT_SECRET")
                 .ok()
                 .filter(|s| !s.is_empty()),

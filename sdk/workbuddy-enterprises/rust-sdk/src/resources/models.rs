@@ -1,4 +1,3 @@
-
 use crate::client::{push_q, push_qb, push_qi, Client};
 use crate::error::Result;
 use crate::response::ApiResponse;
@@ -21,7 +20,11 @@ impl<'a> ModelsResource<'a> {
         )
     }
 
-    pub fn set_builtin_visibility(&self, model_id: &str, body: Value) -> Result<ApiResponse<Value>> {
+    pub fn set_builtin_visibility(
+        &self,
+        model_id: &str,
+        body: Value,
+    ) -> Result<ApiResponse<Value>> {
         self.client.post_json(
             &format!("/openapi/models/builtin/{model_id}/visibility"),
             &[],
@@ -101,10 +104,7 @@ impl<'a> ModelsResource<'a> {
     }
 
     pub fn set_visibility(&self, model_id: &str, body: Value) -> Result<ApiResponse<Value>> {
-        self.client.post_json(
-            &format!("/openapi/models/{model_id}/visibility"),
-            &[],
-            body,
-        )
+        self.client
+            .post_json(&format!("/openapi/models/{model_id}/visibility"), &[], body)
     }
 }

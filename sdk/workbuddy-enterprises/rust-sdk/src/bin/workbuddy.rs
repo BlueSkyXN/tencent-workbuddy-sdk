@@ -1,4 +1,3 @@
-
 use clap::{Parser, Subcommand, ValueEnum};
 use serde_json::{json, Value};
 use std::path::PathBuf;
@@ -271,7 +270,10 @@ fn require_yes(yes: bool, action: &str) -> Result<(), String> {
 }
 
 fn print_json(v: &Value) {
-    println!("{}", serde_json::to_string_pretty(v).unwrap_or_else(|_| v.to_string()));
+    println!(
+        "{}",
+        serde_json::to_string_pretty(v).unwrap_or_else(|_| v.to_string())
+    );
 }
 
 fn print_page(page: &workbuddy_enterprise::Page<Value>) {
@@ -297,7 +299,10 @@ fn main() -> ExitCode {
 fn real_main() -> Result<(), String> {
     let cli = Cli::parse();
     if matches!(cli.command, Commands::Version) {
-        println!("workbuddy {} (workbuddy_enterprise)", workbuddy_enterprise::VERSION);
+        println!(
+            "workbuddy {} (workbuddy_enterprise)",
+            workbuddy_enterprise::VERSION
+        );
         return Ok(());
     }
 
@@ -311,7 +316,10 @@ fn real_main() -> Result<(), String> {
                 print_json(&r.data);
             }
             EnterpriseCmd::License => {
-                let r = client.enterprise().get_license().map_err(|e| e.to_string())?;
+                let r = client
+                    .enterprise()
+                    .get_license()
+                    .map_err(|e| e.to_string())?;
                 print_json(&r.data);
             }
         },
@@ -356,7 +364,10 @@ fn real_main() -> Result<(), String> {
         },
         Commands::Usage { cmd } => match cmd {
             UsageCmd::QuotaCycle => {
-                let r = client.usage().get_quota_cycle().map_err(|e| e.to_string())?;
+                let r = client
+                    .usage()
+                    .get_quota_cycle()
+                    .map_err(|e| e.to_string())?;
                 print_json(&r.data);
             }
             UsageCmd::DefaultQuota => {
@@ -512,7 +523,10 @@ fn real_main() -> Result<(), String> {
                 print_page(&r.data);
             }
             ExpertsCmd::Get { expert_ref } => {
-                let r = client.experts().get(&expert_ref).map_err(|e| e.to_string())?;
+                let r = client
+                    .experts()
+                    .get(&expert_ref)
+                    .map_err(|e| e.to_string())?;
                 print_json(&r.data);
             }
         },

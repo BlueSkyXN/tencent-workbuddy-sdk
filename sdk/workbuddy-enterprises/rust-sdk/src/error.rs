@@ -1,4 +1,3 @@
-
 use thiserror::Error;
 
 pub type Result<T> = std::result::Result<T, Error>;
@@ -42,9 +41,7 @@ pub enum Error {
 impl Error {
     pub fn request_id(&self) -> Option<&str> {
         match self {
-            Error::Http { request_id, .. } | Error::Api { request_id, .. } => {
-                request_id.as_deref()
-            }
+            Error::Http { request_id, .. } | Error::Api { request_id, .. } => request_id.as_deref(),
             _ => None,
         }
     }

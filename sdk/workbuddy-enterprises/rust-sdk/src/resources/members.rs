@@ -1,4 +1,3 @@
-
 use crate::client::{push_q, push_qi, Client};
 use crate::error::Result;
 use crate::response::ApiResponse;
@@ -23,11 +22,8 @@ impl<'a> MembersResource<'a> {
     }
 
     pub fn add_user_ids(&self, user_ids: &[&str]) -> Result<ApiResponse<Value>> {
-        self.client.post_json(
-            "/openapi/members/add",
-            &[],
-            json!({ "userIds": user_ids }),
-        )
+        self.client
+            .post_json("/openapi/members/add", &[], json!({ "userIds": user_ids }))
     }
 
     pub fn add_raw(&self, body: Value) -> Result<ApiResponse<Value>> {
