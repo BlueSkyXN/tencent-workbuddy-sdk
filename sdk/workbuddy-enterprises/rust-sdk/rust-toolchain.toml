@@ -1,6 +1,5 @@
-
-# Pin for CI reproducibility. Local toolchains are optional and discouraged for this repo.
+# Pin for CI reproducibility. Local builds are discouraged for this crate.
 [toolchain]
-channel = "1.83.0"
+channel = "1.86.0"
 profile = "minimal"
 components = ["rustfmt", "clippy"]

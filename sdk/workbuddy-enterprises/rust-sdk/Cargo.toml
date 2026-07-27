@@ -3,7 +3,7 @@
 name = "workbuddy-enterprise"
 version = "0.1.0"
 edition = "2021"
-rust-version = "1.75"
+rust-version = "1.85"
 description = "Unofficial synchronous Rust SDK and CLI for CodeBuddy / WorkBuddy Enterprise OpenAPI"
 license = "GPL-3.0-only"
 readme = "README.md"
