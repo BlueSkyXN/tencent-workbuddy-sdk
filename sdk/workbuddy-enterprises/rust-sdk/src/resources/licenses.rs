@@ -7,7 +7,7 @@ pub struct LicensesResource<'a> {
     pub(crate) client: &'a Client,
 }
 
-impl<'a> LicensesResource<'a> {
+impl LicensesResource<'_> {
     pub fn overview(&self) -> Result<ApiResponse<Value>> {
         self.client.get_json("/openapi/license/overview", &[])
     }

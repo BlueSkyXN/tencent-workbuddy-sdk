@@ -7,7 +7,7 @@ pub struct ModelsResource<'a> {
     pub(crate) client: &'a Client,
 }
 
-impl<'a> ModelsResource<'a> {
+impl ModelsResource<'_> {
     pub fn list_builtin(&self) -> Result<ApiResponse<crate::response::Page<Value>>> {
         self.client.get_page("/openapi/models/builtin", &[])
     }

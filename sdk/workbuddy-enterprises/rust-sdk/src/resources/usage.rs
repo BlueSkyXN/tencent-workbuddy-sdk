@@ -7,7 +7,7 @@ pub struct UsageResource<'a> {
     pub(crate) client: &'a Client,
 }
 
-impl<'a> UsageResource<'a> {
+impl UsageResource<'_> {
     pub fn get_quota_cycle(&self) -> Result<ApiResponse<Value>> {
         self.client.get_json("/openapi/usage/quota-cycle", &[])
     }

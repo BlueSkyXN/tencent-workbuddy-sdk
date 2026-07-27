@@ -7,7 +7,7 @@ pub struct EnterpriseResource<'a> {
     pub(crate) client: &'a Client,
 }
 
-impl<'a> EnterpriseResource<'a> {
+impl EnterpriseResource<'_> {
     pub fn get_info(&self) -> Result<ApiResponse<Value>> {
         self.client.get_json("/info", &[])
     }

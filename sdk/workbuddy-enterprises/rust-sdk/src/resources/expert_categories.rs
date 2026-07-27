@@ -7,7 +7,7 @@ pub struct ExpertCategoriesResource<'a> {
     pub(crate) client: &'a Client,
 }
 
-impl<'a> ExpertCategoriesResource<'a> {
+impl ExpertCategoriesResource<'_> {
     pub fn list(&self) -> Result<ApiResponse<crate::response::Page<Value>>> {
         self.client.get_page("/openapi/expert-categories", &[])
     }

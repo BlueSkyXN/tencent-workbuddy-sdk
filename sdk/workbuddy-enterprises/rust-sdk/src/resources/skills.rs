@@ -10,7 +10,7 @@ pub struct SkillsResource<'a> {
     pub(crate) client: &'a Client,
 }
 
-impl<'a> SkillsResource<'a> {
+impl SkillsResource<'_> {
     pub fn list(
         &self,
         source: SkillSource,

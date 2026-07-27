@@ -7,7 +7,7 @@ pub struct GroupsResource<'a> {
     pub(crate) client: &'a Client,
 }
 
-impl<'a> GroupsResource<'a> {
+impl GroupsResource<'_> {
     pub fn list(
         &self,
         page: Option<i64>,

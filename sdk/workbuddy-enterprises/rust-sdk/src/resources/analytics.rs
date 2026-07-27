@@ -7,7 +7,7 @@ pub struct AnalyticsResource<'a> {
     pub(crate) client: &'a Client,
 }
 
-impl<'a> AnalyticsResource<'a> {
+impl AnalyticsResource<'_> {
     pub fn metrics_download_url_v2(&self, queries: Option<&str>) -> Result<ApiResponse<Value>> {
         let mut q = Vec::new();
         push_q(&mut q, "queries", queries.map(|s| s.to_string()));
