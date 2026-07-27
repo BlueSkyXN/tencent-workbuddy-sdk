@@ -1,0 +1,6 @@
+
+# Pin for CI reproducibility. Local toolchains are optional and discouraged for this repo.
+[toolchain]
+channel = "1.83.0"
+profile = "minimal"
+components = ["rustfmt", "clippy"]

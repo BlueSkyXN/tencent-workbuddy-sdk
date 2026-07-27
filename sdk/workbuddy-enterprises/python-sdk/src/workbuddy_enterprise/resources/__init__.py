@@ -1,0 +1,2 @@
+
+"""Resource namespaces for WorkBuddyClient."""

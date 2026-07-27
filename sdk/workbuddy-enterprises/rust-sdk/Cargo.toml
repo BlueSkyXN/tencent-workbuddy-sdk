@@ -1,0 +1,43 @@
+
+[package]
+name = "workbuddy-enterprise"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+description = "Unofficial synchronous Rust SDK and CLI for CodeBuddy / WorkBuddy Enterprise OpenAPI"
+license = "GPL-3.0-only"
+readme = "README.md"
+keywords = ["workbuddy", "codebuddy", "openapi", "enterprise", "sdk"]
+categories = ["api-bindings", "command-line-utilities"]
+publish = false
+
+[lib]
+name = "workbuddy_enterprise"
+path = "src/lib.rs"
+
+[[bin]]
+name = "workbuddy"
+path = "src/bin/workbuddy.rs"
+required-features = ["cli"]
+
+[features]
+default = ["cli"]
+cli = ["dep:clap", "dep:clap_derive"]
+
+[dependencies]
+base64 = "0.22"
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "json", "multipart", "rustls-tls"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "1"
+url = "2"
+clap = { version = "4", features = ["derive", "env"], optional = true }
+clap_derive = { version = "4", optional = true }
+
+[dev-dependencies]
+# intentionally empty for now; CI builds lib + bin and runs cargo test
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true

@@ -1,0 +1,3 @@
+
+# Repository policy: prefer CI builds. Local target dir still defaults to ./target (gitignored).
+# Do not commit target/ or force local dependency mirrors here.

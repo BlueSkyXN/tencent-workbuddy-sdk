@@ -1,0 +1,58 @@
+
+name: rust-sdk
+
+on:
+  push:
+    paths:
+      - "sdk/workbuddy-enterprises/rust-sdk/**"
+      - ".github/workflows/rust-sdk.yml"
+      - "docs/local-disk-and-ci-builds.md"
+  pull_request:
+    paths:
+      - "sdk/workbuddy-enterprises/rust-sdk/**"
+      - ".github/workflows/rust-sdk.yml"
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: sdk/workbuddy-enterprises/rust-sdk
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: -Dwarnings
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain (CI only)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: "1.83.0"
+          components: rustfmt, clippy
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: sdk/workbuddy-enterprises/rust-sdk
+
+      - name: fmt
+        run: cargo fmt --all -- --check
+
+      - name: clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
+      - name: test
+        run: cargo test --all-features
+
+      - name: release build
+        run: cargo build --release --all-features
+
+      - name: Upload workbuddy CLI artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: workbuddy-cli-linux-x64
+          path: sdk/workbuddy-enterprises/rust-sdk/target/release/workbuddy
+          if-no-files-found: error
