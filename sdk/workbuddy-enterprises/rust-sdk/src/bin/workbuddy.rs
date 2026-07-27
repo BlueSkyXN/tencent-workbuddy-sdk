@@ -491,12 +491,7 @@ fn real_main() -> Result<(), String> {
                 require_yes(yes, "skills create")?;
                 let r = client
                     .skills()
-                    .create(
-                        &name,
-                        &display_name,
-                        package.as_deref(),
-                        Default::default(),
-                    )
+                    .create(&name, &display_name, package.as_deref(), Default::default())
                     .map_err(|e| e.to_string())?;
                 print_json(&r.data);
             }
