@@ -1,16 +1,16 @@
-# SDK tree
+# SDK 目录
 
 ```text
 sdk/
   workbuddy-enterprises/
-    python-sdk/     # Python package: workbuddy-enterprise
-    rust-sdk/       # Rust crate + workbuddy CLI (CI-only build)
+    python-sdk/     # Python：workbuddy-enterprise
+    rust-sdk/       # Rust：workbuddy_enterprise + CLI workbuddy
 ```
 
-## Disk / CI policy
+完整说明请看仓库文档中心：
 
-See:
+- [docs/README.md](../docs/README.md)
+- [docs/architecture.md](../docs/architecture.md)
+- [docs/local-disk-and-ci-builds.md](../docs/local-disk-and-ci-builds.md)
 
-[`docs/local-disk-and-ci-builds.md`](../docs/local-disk-and-ci-builds.md)
-
-Rust builds are performed **only** in GitHub Actions. Do not create local `target/` for routine development.
+Rust 默认 **仅 CI 构建**，不要在本机例行 `cargo build`。

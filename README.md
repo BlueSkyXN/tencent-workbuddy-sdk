@@ -1,29 +1,44 @@
 # tencent-workbuddy-sdk
 
-**Unofficial** multi-language client workspace for CodeBuddy / WorkBuddy integrations.
+**非官方** CodeBuddy / WorkBuddy **企业 OpenAPI** 多语言客户端工作区。
 
-> Not an official Tencent package.
+> Not an official Tencent package.  
+> 覆盖企业管理 REST（skills / models / members / usage 等），**不是** Agent Runtime / AgentOS SDK。
 
-## Layout
+## 文档入口
+
+从这里开始：
+
+**[docs/README.md](docs/README.md)**
+
+常用：
+
+| 文档 | 内容 |
+|---|---|
+| [docs/overview.md](docs/overview.md) | 仓库定位与边界 |
+| [docs/getting-started.md](docs/getting-started.md) | Python / Rust 快速开始 |
+| [docs/architecture.md](docs/architecture.md) | 目录分层与职责 |
+| [docs/authentication.md](docs/authentication.md) | 鉴权约定 |
+| [docs/ci-and-artifacts.md](docs/ci-and-artifacts.md) | CI 与产物下载 |
+| [docs/local-disk-and-ci-builds.md](docs/local-disk-and-ci-builds.md) | 本机磁盘 / Rust CI-only |
+
+## 目录结构
 
 ```text
 tencent-workbuddy-sdk/
-  LICENSE
-  README.md
-  docs/
-    local-disk-and-ci-builds.md   # 本机磁盘压力 / CI 构建约束
+  docs/                         # 仓库级文档
   sdk/
     workbuddy-enterprises/
-      python-sdk/                 # Python Enterprise OpenAPI SDK
-      rust-sdk/                   # Rust SDK + workbuddy CLI（CI-only build）
-  local/                          # 本机快照（gitignored）
+      python-sdk/               # Python SDK
+      rust-sdk/                 # Rust SDK + workbuddy CLI（CI-only）
+  local/                        # 本机快照（gitignore）
 ```
 
-## Current SDKs
+## 当前组件
 
-### Python
+### Python SDK
 
-[`sdk/workbuddy-enterprises/python-sdk`](sdk/workbuddy-enterprises/python-sdk)
+路径：[`sdk/workbuddy-enterprises/python-sdk`](sdk/workbuddy-enterprises/python-sdk)
 
 ```bash
 cd sdk/workbuddy-enterprises/python-sdk
@@ -33,19 +48,21 @@ python -m pytest tests/unit tests/contract
 
 ### Rust SDK + CLI
 
-[`sdk/workbuddy-enterprises/rust-sdk`](sdk/workbuddy-enterprises/rust-sdk)
+路径：[`sdk/workbuddy-enterprises/rust-sdk`](sdk/workbuddy-enterprises/rust-sdk)
 
-- Library: `workbuddy_enterprise`
-- CLI binary: `workbuddy`
-- **Build only in GitHub Actions** (see workflow `rust-sdk.yml`)
-- **Do not** run `cargo build` / `cargo test` locally for this package
+- 库名：`workbuddy_enterprise`
+- CLI：`workbuddy`（从 Actions artifact `workbuddy-cli-linux-x64` 下载）
+- **默认禁止本机 `cargo build/test/run`**，详见 [docs/local-disk-and-ci-builds.md](docs/local-disk-and-ci-builds.md)
 
-Download the CLI from Actions artifacts after CI succeeds.
+## CI
 
-## Engineering constraint: keep the laptop light
+| Workflow | 作用 |
+|---|---|
+| `ci` | Python 测试与 wheel |
+| `rust-sdk` | Rust 检查、测试、release CLI artifact |
 
-- Prefer GitHub Actions for heavy builds
-- Never commit `.venv` / `dist` / `target` / secrets
-- Rust is **CI-only** by policy
+详情：[docs/ci-and-artifacts.md](docs/ci-and-artifacts.md)
 
-Full note: [`docs/local-disk-and-ci-builds.md`](docs/local-disk-and-ci-builds.md)
+## 许可证
+
+GPL-3.0（见 [`LICENSE`](LICENSE)）。嵌入其他产品前请评估兼容性。

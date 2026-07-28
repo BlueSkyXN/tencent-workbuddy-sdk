@@ -1,5 +1,8 @@
 # workbuddy-enterprise (Python)
 
+> 仓库总文档：[docs/README.md](../../../../docs/README.md) · 快速开始：[docs/getting-started.md](../../../../docs/getting-started.md)
+
+
 **Unofficial** synchronous Python SDK for the CodeBuddy / WorkBuddy **Enterprise OpenAPI**.
 
 > This is **not** an official Tencent / CodeBuddy package.
