@@ -1,6 +1,8 @@
 
 # workbuddy-enterprise (Rust)
 
+> 仓库总文档：[docs/README.md](../../../docs/README.md) · 快速开始：[docs/getting-started.md](../../../docs/getting-started.md) · CI-only：[CI_ONLY_BUILD.md](CI_ONLY_BUILD.md)
+
 **Unofficial** synchronous Rust SDK + CLI for CodeBuddy / WorkBuddy **Enterprise OpenAPI**.
 
 > Not an official Tencent package.  
