@@ -8,6 +8,7 @@ pub struct UsersResource<'a> {
 }
 
 impl UsersResource<'_> {
+    #[allow(clippy::too_many_arguments)]
     pub fn list(
         &self,
         page: Option<i64>,
