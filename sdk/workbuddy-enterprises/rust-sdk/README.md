@@ -15,6 +15,11 @@
 | CLI binary | `workbuddy` |
 | Python sibling | `../python-sdk` |
 
+## OpenAPI source
+
+权威规范：https://www.codebuddy.cn/apiDocs/api.yaml  
+说明文档：[docs/openapi-spec.md](../../../docs/openapi-spec.md)
+
 ## Disk / build policy (hard rule)
 
 This package is intentionally **CI-built**:

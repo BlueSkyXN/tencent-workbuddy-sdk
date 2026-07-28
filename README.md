@@ -16,6 +16,7 @@
 | 文档 | 内容 |
 |---|---|
 | [docs/overview.md](docs/overview.md) | 仓库定位与边界 |
+| [docs/openapi-spec.md](docs/openapi-spec.md) | **api.yaml 官方地址与来源** |
 | [docs/getting-started.md](docs/getting-started.md) | Python / Rust 快速开始 |
 | [docs/architecture.md](docs/architecture.md) | 目录分层与职责 |
 | [docs/authentication.md](docs/authentication.md) | 鉴权约定 |

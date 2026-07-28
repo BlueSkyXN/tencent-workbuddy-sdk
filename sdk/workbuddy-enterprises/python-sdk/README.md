@@ -34,6 +34,12 @@ Covers the enterprise management OpenAPI surface, including:
 
 ## Spec anchor
 
+**权威来源（官方）：** https://www.codebuddy.cn/apiDocs/api.yaml
+
+人读文档站：https://www.codebuddy.cn/apiDocs/index.html
+
+仓库级说明：[docs/openapi-spec.md](../../../../docs/openapi-spec.md)
+
 Public docs:
 
 - UI: https://www.codebuddy.cn/apiDocs/index.html

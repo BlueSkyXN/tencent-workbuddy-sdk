@@ -42,12 +42,16 @@
 
 ## 契约来源
 
-- 文档站：https://www.codebuddy.cn/apiDocs/index.html  
-- OpenAPI：https://www.codebuddy.cn/apiDocs/api.yaml  
+**权威 OpenAPI 文件：**
+
+- `api.yaml`：https://www.codebuddy.cn/apiDocs/api.yaml  
+- 文档站 UI：https://www.codebuddy.cn/apiDocs/index.html  
 - 默认 API Base：`https://api.copilot.tencent.com/api/v1`  
 - 默认 Token URL：`https://copilot.tencent.com/oauth2/token`  
 
-本机可把规范快照放到仓库根 `local/`（已 gitignore），仅作离线对照，不作为发布物。
+完整说明（来源、下载、本机快照、SHA-256 锚定）：**[openapi-spec.md](openapi-spec.md)**
+
+本机可把规范快照放到仓库根 `local/codebuddy-openapi-api.yaml`（已 gitignore），仅作离线对照，**不提交、不随仓库发布**。
 
 ## 许可证
 

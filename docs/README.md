@@ -10,6 +10,7 @@
 | 文档 | 说明 |
 |---|---|
 | [overview.md](overview.md) | 仓库是什么、不是什么、当前交付边界 |
+| [openapi-spec.md](openapi-spec.md) | **api.yaml 官方地址、来源、本机快照约定** |
 | [getting-started.md](getting-started.md) | Python / Rust 最短上手路径 |
 | [architecture.md](architecture.md) | 目录分层、双语言布局、职责边界 |
 | [authentication.md](authentication.md) | 企业 OpenAPI 鉴权约定 |
@@ -31,6 +32,7 @@
 ## 阅读顺序建议
 
 1. [overview.md](overview.md)  
-2. [getting-started.md](getting-started.md)  
-3. 按语言进入对应包 README  
-4. 若会动 Rust 或担心本机膨胀：先看 [local-disk-and-ci-builds.md](local-disk-and-ci-builds.md)
+2. [openapi-spec.md](openapi-spec.md)  
+3. [getting-started.md](getting-started.md)  
+4. 按语言进入对应包 README  
+5. 若会动 Rust 或担心本机膨胀：先看 [local-disk-and-ci-builds.md](local-disk-and-ci-builds.md)
