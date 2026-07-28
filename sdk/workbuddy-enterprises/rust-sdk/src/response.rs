@@ -32,15 +32,20 @@ pub(crate) struct WireEnvelope {
 }
 
 pub fn parse_page(data: Value) -> Page<Value> {
+    parse_page_with_keys(data, &["items", "list", "records", "users", "members"])
+}
+
+pub fn parse_page_with_keys(data: Value, item_keys: &[&str]) -> Page<Value> {
     let obj = data.as_object().cloned().unwrap_or_default();
-    let items = obj
-        .get("items")
-        .or_else(|| obj.get("list"))
-        .or_else(|| obj.get("records"))
-        .and_then(|v| v.as_array())
-        .cloned()
-        .unwrap_or_default();
-    Page {
+    let mut items = Vec::new();
+    for key in item_keys {
+        if let Some(Value::Array(arr)) = obj.get(*key) {
+            items = arr.clone();
+            break;
+        }
+    }
+
+    let mut page = Page {
         items,
         total_count: int_field(&obj, "totalCount").or_else(|| int_field(&obj, "total")),
         page: int_field(&obj, "page"),
@@ -50,8 +55,31 @@ pub fn parse_page(data: Value) -> Page<Value> {
             .get("nextPageToken")
             .and_then(|v| v.as_str())
             .map(|s| s.to_string()),
-        extra: Value::Object(obj),
+        extra: Value::Object(obj.clone()),
+    };
+
+    if let Some(Value::Object(nested)) = obj.get("pagination") {
+        if page.total_count.is_none() {
+            page.total_count =
+                int_field(nested, "totalCount").or_else(|| int_field(nested, "total"));
+        }
+        if page.page.is_none() {
+            page.page = int_field(nested, "page");
+        }
+        if page.page_num.is_none() {
+            page.page_num = int_field(nested, "pageNum");
+        }
+        if page.page_size.is_none() {
+            page.page_size = int_field(nested, "pageSize");
+        }
+        if page.next_page_token.is_none() {
+            page.next_page_token = nested
+                .get("nextPageToken")
+                .and_then(|v| v.as_str())
+                .map(|s| s.to_string());
+        }
     }
+    page
 }
 
 fn int_field(obj: &serde_json::Map<String, Value>, key: &str) -> Option<i64> {

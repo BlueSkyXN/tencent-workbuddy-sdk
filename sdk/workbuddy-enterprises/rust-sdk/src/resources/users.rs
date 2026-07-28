@@ -1,6 +1,6 @@
 use crate::client::{push_q, push_qb, push_qi, Client};
 use crate::error::Result;
-use crate::response::{parse_page, ApiResponse, Page};
+use crate::response::{parse_page_with_keys, ApiResponse, Page};
 use serde_json::{json, Value};
 
 pub struct UsersResource<'a> {
@@ -15,6 +15,10 @@ impl UsersResource<'_> {
         keyword: Option<&str>,
         dep: Option<&str>,
         include_subtree: Option<bool>,
+        is_root: Option<bool>,
+        plugin_enabled: Option<i64>,
+        use_cache: Option<bool>,
+        exact_match: Option<bool>,
     ) -> Result<ApiResponse<Page<Value>>> {
         let mut q = Vec::new();
         push_qi(&mut q, "page", page);
@@ -22,23 +26,12 @@ impl UsersResource<'_> {
         push_q(&mut q, "keyword", keyword.map(|s| s.to_string()));
         push_q(&mut q, "dep", dep.map(|s| s.to_string()));
         push_qb(&mut q, "include_subtree", include_subtree);
+        push_qb(&mut q, "is_root", is_root);
+        push_qi(&mut q, "plugin_enabled", plugin_enabled);
+        push_qb(&mut q, "use_cache", use_cache);
+        push_qb(&mut q, "exact_match", exact_match);
         let resp = self.client.get_json("/users", &q)?;
-        let page = if resp.data.get("items").is_some()
-            || resp.data.get("list").is_some()
-            || resp.data.get("totalCount").is_some()
-        {
-            parse_page(resp.data)
-        } else {
-            Page {
-                items: vec![],
-                total_count: None,
-                page: None,
-                page_num: None,
-                page_size: None,
-                next_page_token: None,
-                extra: resp.data,
-            }
-        };
+        let page = parse_page_with_keys(resp.data, &["users", "items", "list", "records"]);
         Ok(ApiResponse {
             data: page,
             code: resp.code,
@@ -55,7 +48,7 @@ impl UsersResource<'_> {
 
     pub fn delete(&self, user_id: &str) -> Result<ApiResponse<Value>> {
         self.client
-            .post_json(&format!("/users/{user_id}/delete"), &[], json!({}))
+            .post_empty(&format!("/users/{user_id}/delete"), &[])
     }
 
     pub fn update_password(&self, user_id: &str, password: &str) -> Result<ApiResponse<Value>> {

@@ -1,7 +1,6 @@
-
 from __future__ import annotations
 
-from typing import Any, Sequence
+from typing import Any, Mapping, Sequence
 
 from workbuddy_enterprise.pagination import page_query
 from workbuddy_enterprise.resources._base import Resource
@@ -20,11 +19,21 @@ class MembersResource(Resource):
         params = {"keyword": keyword, **page_query(page_num=page_num, page_size=page_size)}
         return self._as_page(self._get("/openapi/members", params=params))
 
-    def add(self, members: Sequence[dict[str, Any]] | Sequence[str], **body_fields: Any) -> ApiResponse[dict[str, Any]]:
-        # Spec: batch add members; accept list of user payloads or emails/ids under common keys.
-        if members and isinstance(members[0], str):
-            payload: dict[str, Any] = {"userIds": list(members)}
-        else:
-            payload = {"members": list(members)}
+    def add(
+        self,
+        members: Sequence[Mapping[str, Any]],
+        *,
+        grant_license: bool | None = None,
+        **body_fields: Any,
+    ) -> ApiResponse[dict[str, Any]]:
+        """Batch add members.
+
+        YAML requires body.members[] with at least username + email.
+        """
+        payload: dict[str, Any] = {
+            "members": [dict(m) for m in members],
+        }
+        if grant_license is not None:
+            payload["grantLicense"] = grant_license
         payload.update(clean_dict(body_fields))
         return self._as_map(self._post_json("/openapi/members/add", body=payload))

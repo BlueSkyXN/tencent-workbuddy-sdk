@@ -1,6 +1,6 @@
 # workbuddy-enterprise (Python)
 
-> 仓库总文档：[docs/README.md](../../../../docs/README.md) · 快速开始：[docs/getting-started.md](../../../../docs/getting-started.md)
+> 仓库总文档：[docs/README.md](../../../docs/README.md) · 快速开始：[docs/getting-started.md](../../../docs/getting-started.md)
 
 
 **Unofficial** synchronous Python SDK for the CodeBuddy / WorkBuddy **Enterprise OpenAPI**.
@@ -38,7 +38,7 @@ Covers the enterprise management OpenAPI surface, including:
 
 人读文档站：https://www.codebuddy.cn/apiDocs/index.html
 
-仓库级说明：[docs/openapi-spec.md](../../../../docs/openapi-spec.md)
+仓库级说明：[docs/openapi-spec.md](../../../docs/openapi-spec.md)
 
 Public docs:
 
@@ -129,5 +129,5 @@ No PyPI publish is configured.
 
 本仓库要求减少本机磁盘压力；打包优先 CI。详见：
 
-[`docs/local-disk-and-ci-builds.md`](../../../../docs/local-disk-and-ci-builds.md)
+[`docs/local-disk-and-ci-builds.md`](../../../docs/local-disk-and-ci-builds.md)
 

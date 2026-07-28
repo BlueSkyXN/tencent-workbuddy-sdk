@@ -542,7 +542,17 @@ fn real_main() -> Result<(), String> {
             } => {
                 let r = client
                     .users()
-                    .list(page, page_size, keyword.as_deref(), None, None)
+                    .list(
+                        page,
+                        page_size,
+                        keyword.as_deref(),
+                        None,
+                        None,
+                        None,
+                        None,
+                        None,
+                        None,
+                    )
                     .map_err(|e| e.to_string())?;
                 print_page(&r.data);
             }

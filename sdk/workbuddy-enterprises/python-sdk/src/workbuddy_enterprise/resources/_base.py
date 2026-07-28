@@ -32,12 +32,21 @@ class Resource:
         *,
         params: Mapping[str, Any] | None = None,
         body: Mapping[str, Any] | None = None,
+        send_json: bool = True,
     ) -> ApiResponse[Any]:
+        # send_json=False: POST without request body (YAML deletes without requestBody)
+        json_body: Mapping[str, Any] | None
+        if not send_json:
+            json_body = None
+        elif body is None:
+            json_body = {}
+        else:
+            json_body = body
         return self._t.request(
             "POST",
             self._path(suffix),
             params=params,
-            json_body=body if body is not None else {},
+            json_body=json_body,
         )
 
     def _post_multipart(

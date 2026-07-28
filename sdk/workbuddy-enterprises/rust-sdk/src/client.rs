@@ -128,6 +128,14 @@ impl Client {
         self.request("GET", suffix, query, None, None)
     }
 
+    pub(crate) fn post_empty(
+        &self,
+        suffix: &str,
+        query: &[(String, String)],
+    ) -> Result<ApiResponse<Value>> {
+        self.request("POST", suffix, query, None, None)
+    }
+
     pub(crate) fn post_json(
         &self,
         suffix: &str,
@@ -215,8 +223,6 @@ impl Client {
             builder.multipart(form).send()
         } else if let Some(body) = json_body {
             builder.json(&body).send()
-        } else if method == "POST" {
-            builder.json(&json!({})).send()
         } else {
             builder.send()
         }

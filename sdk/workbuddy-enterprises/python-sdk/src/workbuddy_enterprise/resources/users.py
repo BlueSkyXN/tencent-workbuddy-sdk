@@ -1,9 +1,8 @@
-
 from __future__ import annotations
 
 from typing import Any
 
-from workbuddy_enterprise.pagination import page_query
+from workbuddy_enterprise.pagination import page_query, parse_page
 from workbuddy_enterprise.resources._base import Resource
 from workbuddy_enterprise.response import ApiResponse, Page
 from workbuddy_enterprise._serialization import clean_dict
@@ -19,7 +18,7 @@ class UsersResource(Resource):
         dep: str | None = None,
         include_subtree: bool | None = None,
         is_root: bool | None = None,
-        plugin_enabled: bool | None = None,
+        plugin_enabled: int | None = None,
         use_cache: bool | None = None,
         exact_match: bool | None = None,
     ) -> ApiResponse[Page[dict[str, Any]] | dict[str, Any]]:
@@ -34,19 +33,25 @@ class UsersResource(Resource):
             **page_query(page=page, page_size=page_size),
         }
         resp = self._get("/users", params=params)
-        if isinstance(resp.data, dict) and ("items" in resp.data or "list" in resp.data or "totalCount" in resp.data):
-            return self._as_page(resp)
+        if isinstance(resp.data, dict) and (
+            "users" in resp.data
+            or "items" in resp.data
+            or "list" in resp.data
+            or "totalCount" in resp.data
+        ):
+            page_obj = parse_page(resp.data, item_keys=("users", "items", "list", "records"))
+            return ApiResponse(page_obj, resp.code, resp.message, resp.request_id, resp.raw)
         return self._as_map(resp)
 
     def update(self, user_id: str, **fields: Any) -> ApiResponse[dict[str, Any]]:
         mapping = {
-            "user_name": "userName",
-            "userName": "userName",
+            "user_enterprise_name": "userEnterpriseName",
+            "userEnterpriseName": "userEnterpriseName",
+            # common mistake alias
+            "user_name": "userEnterpriseName",
+            "userName": "userEnterpriseName",
             "email": "email",
             "phone": "phone",
-            "department_ids": "departmentIds",
-            "departmentIds": "departmentIds",
-            "status": "status",
         }
         body: dict[str, Any] = {}
         for k, v in fields.items():
@@ -56,7 +61,7 @@ class UsersResource(Resource):
         return self._as_map(self._post_json(f"/users/{user_id}/update", body=body))
 
     def delete(self, user_id: str) -> ApiResponse[dict[str, Any] | None]:
-        resp = self._post_json(f"/users/{user_id}/delete", body={})
+        resp = self._post_json(f"/users/{user_id}/delete", body=None, send_json=False)
         if resp.data is None:
             return ApiResponse(None, resp.code, resp.message, resp.request_id, resp.raw)
         return self._as_map(resp)

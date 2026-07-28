@@ -21,9 +21,19 @@ impl MembersResource<'_> {
         self.client.get_page("/openapi/members", &q)
     }
 
-    pub fn add_user_ids(&self, user_ids: &[&str]) -> Result<ApiResponse<Value>> {
+    /// YAML requires body.members[] with username + email.
+    pub fn add(
+        &self,
+        members: &[Value],
+        grant_license: Option<bool>,
+    ) -> Result<ApiResponse<Value>> {
+        let mut body = serde_json::Map::new();
+        body.insert("members".into(), json!(members));
+        if let Some(g) = grant_license {
+            body.insert("grantLicense".into(), json!(g));
+        }
         self.client
-            .post_json("/openapi/members/add", &[], json!({ "userIds": user_ids }))
+            .post_json("/openapi/members/add", &[], Value::Object(body))
     }
 
     pub fn add_raw(&self, body: Value) -> Result<ApiResponse<Value>> {

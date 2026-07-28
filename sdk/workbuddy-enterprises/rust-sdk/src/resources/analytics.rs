@@ -1,6 +1,6 @@
-use crate::client::{push_q, Client};
+use crate::client::{push_q, push_qi, Client};
 use crate::error::Result;
-use crate::response::{parse_page, ApiResponse, Page};
+use crate::response::{parse_page_with_keys, ApiResponse, Page};
 use serde_json::Value;
 
 pub struct AnalyticsResource<'a> {
@@ -8,21 +8,48 @@ pub struct AnalyticsResource<'a> {
 }
 
 impl AnalyticsResource<'_> {
-    pub fn metrics_download_url_v2(&self, queries: Option<&str>) -> Result<ApiResponse<Value>> {
+    pub fn metrics_download_url_v2(
+        &self,
+        queries: &str,
+        range_start: &str,
+        range_end: &str,
+        range_step: i64,
+    ) -> Result<ApiResponse<Value>> {
         let mut q = Vec::new();
-        push_q(&mut q, "queries", queries.map(|s| s.to_string()));
+        push_q(&mut q, "queries", Some(queries.to_string()));
+        push_q(&mut q, "range.start", Some(range_start.to_string()));
+        push_q(&mut q, "range.end", Some(range_end.to_string()));
+        push_qi(&mut q, "range.step", Some(range_step));
         self.client.get_json("/metrics/download_url/v2", &q)
     }
 
-    pub fn metrics_download_url(&self, queries: Option<&str>) -> Result<ApiResponse<Value>> {
+    pub fn metrics_download_url(
+        &self,
+        queries: &str,
+        range_start: &str,
+        range_end: &str,
+        range_step: i64,
+    ) -> Result<ApiResponse<Value>> {
         let mut q = Vec::new();
-        push_q(&mut q, "queries", queries.map(|s| s.to_string()));
+        push_q(&mut q, "queries", Some(queries.to_string()));
+        push_q(&mut q, "range.start", Some(range_start.to_string()));
+        push_q(&mut q, "range.end", Some(range_end.to_string()));
+        push_qi(&mut q, "range.step", Some(range_step));
         self.client.get_json("/metrics/download_url", &q)
     }
 
-    pub fn metrics(&self, queries: Option<&str>) -> Result<ApiResponse<Value>> {
+    pub fn metrics(
+        &self,
+        queries: &str,
+        range_start: &str,
+        range_end: &str,
+        range_step: i64,
+    ) -> Result<ApiResponse<Value>> {
         let mut q = Vec::new();
-        push_q(&mut q, "queries", queries.map(|s| s.to_string()));
+        push_q(&mut q, "queries", Some(queries.to_string()));
+        push_q(&mut q, "range.start", Some(range_start.to_string()));
+        push_q(&mut q, "range.end", Some(range_end.to_string()));
+        push_qi(&mut q, "range.step", Some(range_step));
         self.client.get_json("/metrics", &q)
     }
 
@@ -48,19 +75,7 @@ impl AnalyticsResource<'_> {
 
     pub fn member_data(&self, body: Value) -> Result<ApiResponse<Page<Value>>> {
         let resp = self.client.post_json("/dashboard/member/data", &[], body)?;
-        let page = if resp.data.get("items").is_some() || resp.data.get("list").is_some() {
-            parse_page(resp.data)
-        } else {
-            Page {
-                items: vec![],
-                total_count: None,
-                page: None,
-                page_num: None,
-                page_size: None,
-                next_page_token: None,
-                extra: resp.data,
-            }
-        };
+        let page = parse_page_with_keys(resp.data, &["members", "items", "list", "records"]);
         Ok(ApiResponse {
             data: page,
             code: resp.code,

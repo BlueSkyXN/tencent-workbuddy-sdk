@@ -47,7 +47,7 @@ class SkillCategoriesResource(Resource):
         return ApiResponse(None, resp.code, resp.message, resp.request_id, resp.raw)
 
     def delete(self, category_id: int) -> ApiResponse[dict[str, Any]]:
-        return self._as_map(self._post_json(f"/openapi/skill-categories/{category_id}/delete", body={}))
+        return self._as_map(self._post_json(f"/openapi/skill-categories/{category_id}/delete", body=None, send_json=False))
 
     def reorder(self, ordered_ids: Sequence[int]) -> ApiResponse[None]:
         resp = self._post_json(

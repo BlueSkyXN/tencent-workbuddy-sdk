@@ -67,11 +67,8 @@ impl SkillsResource<'_> {
     }
 
     pub fn delete(&self, skill_ref: &str) -> Result<ApiResponse<Value>> {
-        self.client.post_json(
-            &format!("/openapi/skills/{skill_ref}/delete"),
-            &[],
-            json!({}),
-        )
+        self.client
+            .post_empty(&format!("/openapi/skills/{skill_ref}/delete"), &[])
     }
 
     pub fn set_enabled(

@@ -1,5 +1,8 @@
 # API coverage matrix
 
+> **注意（2026-07-28）：** `contract_tested` 表示存在 Python mock 合同测试，且样例已按 YAML 关键字段校正。
+> 这**不等于**全部 73 个 operation 已在真实企业环境 live 验证。
+
 Status keys:
 
 - `implemented`: real client method

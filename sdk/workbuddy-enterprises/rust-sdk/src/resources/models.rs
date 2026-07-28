@@ -23,12 +23,15 @@ impl ModelsResource<'_> {
     pub fn set_builtin_visibility(
         &self,
         model_id: &str,
-        body: Value,
+        scope: &str,
+        user_ids: Option<&[&str]>,
+        group_ids: Option<&[&str]>,
     ) -> Result<ApiResponse<Value>> {
-        self.client.post_json(
+        self.set_model_visibility(
             &format!("/openapi/models/builtin/{model_id}/visibility"),
-            &[],
-            body,
+            scope,
+            user_ids,
+            group_ids,
         )
     }
 
@@ -53,18 +56,23 @@ impl ModelsResource<'_> {
     }
 
     pub fn delete_custom(&self, model_id: &str) -> Result<ApiResponse<Value>> {
-        self.client.post_json(
-            &format!("/openapi/models/custom/{model_id}/delete"),
-            &[],
-            json!({}),
-        )
+        // no requestBody in YAML
+        self.client
+            .post_empty(&format!("/openapi/models/custom/{model_id}/delete"), &[])
     }
 
-    pub fn set_custom_visibility(&self, model_id: &str, body: Value) -> Result<ApiResponse<Value>> {
-        self.client.post_json(
+    pub fn set_custom_visibility(
+        &self,
+        model_id: &str,
+        scope: &str,
+        user_ids: Option<&[&str]>,
+        group_ids: Option<&[&str]>,
+    ) -> Result<ApiResponse<Value>> {
+        self.set_model_visibility(
             &format!("/openapi/models/custom/{model_id}/visibility"),
-            &[],
-            body,
+            scope,
+            user_ids,
+            group_ids,
         )
     }
 
@@ -103,8 +111,36 @@ impl ModelsResource<'_> {
         )
     }
 
-    pub fn set_visibility(&self, model_id: &str, body: Value) -> Result<ApiResponse<Value>> {
-        self.client
-            .post_json(&format!("/openapi/models/{model_id}/visibility"), &[], body)
+    pub fn set_visibility(
+        &self,
+        model_id: &str,
+        scope: &str,
+        user_ids: Option<&[&str]>,
+        group_ids: Option<&[&str]>,
+    ) -> Result<ApiResponse<Value>> {
+        self.set_model_visibility(
+            &format!("/openapi/models/{model_id}/visibility"),
+            scope,
+            user_ids,
+            group_ids,
+        )
+    }
+
+    fn set_model_visibility(
+        &self,
+        suffix: &str,
+        scope: &str,
+        user_ids: Option<&[&str]>,
+        group_ids: Option<&[&str]>,
+    ) -> Result<ApiResponse<Value>> {
+        let mut body = serde_json::Map::new();
+        body.insert("scope".into(), json!(scope));
+        if let Some(v) = user_ids {
+            body.insert("userIds".into(), json!(v));
+        }
+        if let Some(v) = group_ids {
+            body.insert("groupIds".into(), json!(v));
+        }
+        self.client.post_json(suffix, &[], Value::Object(body))
     }
 }

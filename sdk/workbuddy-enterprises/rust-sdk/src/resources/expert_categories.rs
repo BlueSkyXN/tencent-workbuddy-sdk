@@ -39,10 +39,9 @@ impl ExpertCategoriesResource<'_> {
     }
 
     pub fn delete(&self, category_id: i64) -> Result<ApiResponse<Value>> {
-        self.client.post_json(
+        self.client.post_empty(
             &format!("/openapi/expert-categories/{category_id}/delete"),
             &[],
-            json!({}),
         )
     }
 

@@ -1,20 +1,17 @@
-
 from __future__ import annotations
 
-from typing import Any, Mapping
+from typing import Any, Mapping, Sequence
 
 from workbuddy_enterprise.pagination import page_query
 from workbuddy_enterprise.resources._base import Resource
 from workbuddy_enterprise.response import ApiResponse, Page
-from workbuddy_enterprise.schemas.common import VisibilityScope, VisibilitySpec
-from workbuddy_enterprise.types import ModelSource, VisibilityType
+from workbuddy_enterprise.types import ModelSource
 from workbuddy_enterprise._serialization import clean_dict, dump_value
 
 
 class ModelsResource(Resource):
     def list_builtin(self) -> ApiResponse[Page[dict[str, Any]] | dict[str, Any]]:
         resp = self._get("/openapi/models/builtin")
-        # some list endpoints return items page, others list directly
         if isinstance(resp.data, dict) and ("items" in resp.data or "list" in resp.data):
             return self._as_page(resp)
         return self._as_map(resp)
@@ -30,10 +27,16 @@ class ModelsResource(Resource):
         self,
         model_id: str,
         *,
-        type: VisibilityType | str,
-        scopes: list[VisibilityScope | Mapping[str, Any]] | None = None,
+        scope: str,
+        user_ids: Sequence[str] | None = None,
+        group_ids: Sequence[str] | None = None,
     ) -> ApiResponse[None]:
-        return self._set_visibility(f"/openapi/models/builtin/{model_id}/visibility", type=type, scopes=scopes)
+        return self._set_model_visibility(
+            f"/openapi/models/builtin/{model_id}/visibility",
+            scope=scope,
+            user_ids=user_ids,
+            group_ids=group_ids,
+        )
 
     def list_custom(
         self,
@@ -46,7 +49,6 @@ class ModelsResource(Resource):
         )
 
     def create_custom(self, **fields: Any) -> ApiResponse[dict[str, Any]]:
-        # Accept snake_case keys and map common ones; also allow already-camel keys via **fields
         mapping = {
             "name": "name",
             "display_name": "displayName",
@@ -72,17 +74,23 @@ class ModelsResource(Resource):
         return self._as_map(self._get(f"/openapi/models/custom/{model_id}"))
 
     def delete_custom(self, model_id: str) -> ApiResponse[None]:
-        resp = self._post_json(f"/openapi/models/custom/{model_id}/delete", body={})
+        resp = self._post_json(f"/openapi/models/custom/{model_id}/delete", body=None, send_json=False)
         return ApiResponse(None, resp.code, resp.message, resp.request_id, resp.raw)
 
     def set_custom_visibility(
         self,
         model_id: str,
         *,
-        type: VisibilityType | str,
-        scopes: list[VisibilityScope | Mapping[str, Any]] | None = None,
+        scope: str,
+        user_ids: Sequence[str] | None = None,
+        group_ids: Sequence[str] | None = None,
     ) -> ApiResponse[None]:
-        return self._set_visibility(f"/openapi/models/custom/{model_id}/visibility", type=type, scopes=scopes)
+        return self._set_model_visibility(
+            f"/openapi/models/custom/{model_id}/visibility",
+            scope=scope,
+            user_ids=user_ids,
+            group_ids=group_ids,
+        )
 
     def list_available(self, *, user_id: str) -> ApiResponse[dict[str, Any] | Page[dict[str, Any]]]:
         resp = self._get("/openapi/models/available", params={"userId": user_id})
@@ -118,24 +126,31 @@ class ModelsResource(Resource):
         self,
         model_id: str,
         *,
-        type: VisibilityType | str,
-        scopes: list[VisibilityScope | Mapping[str, Any]] | None = None,
+        scope: str,
+        user_ids: Sequence[str] | None = None,
+        group_ids: Sequence[str] | None = None,
     ) -> ApiResponse[None]:
-        return self._set_visibility(f"/openapi/models/{model_id}/visibility", type=type, scopes=scopes)
+        return self._set_model_visibility(
+            f"/openapi/models/{model_id}/visibility",
+            scope=scope,
+            user_ids=user_ids,
+            group_ids=group_ids,
+        )
 
-    def _set_visibility(
+    def _set_model_visibility(
         self,
         suffix: str,
         *,
-        type: VisibilityType | str,
-        scopes: list[VisibilityScope | Mapping[str, Any]] | None,
+        scope: str,
+        user_ids: Sequence[str] | None,
+        group_ids: Sequence[str] | None,
     ) -> ApiResponse[None]:
-        scope_objs: list[VisibilityScope] = []
-        for s in scopes or []:
-            if isinstance(s, VisibilityScope):
-                scope_objs.append(s)
-            else:
-                scope_objs.append(VisibilityScope.from_mapping(s))
-        body = VisibilitySpec(type=dump_value(type), scopes=scope_objs).to_wire()
+        body = clean_dict(
+            {
+                "scope": scope,
+                "userIds": list(user_ids) if user_ids is not None else None,
+                "groupIds": list(group_ids) if group_ids is not None else None,
+            }
+        )
         resp = self._post_json(suffix, body=body)
         return ApiResponse(None, resp.code, resp.message, resp.request_id, resp.raw)

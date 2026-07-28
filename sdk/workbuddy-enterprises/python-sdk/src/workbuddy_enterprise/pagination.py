@@ -1,4 +1,3 @@
-
 """Pagination helpers."""
 
 from __future__ import annotations
@@ -9,12 +8,16 @@ from workbuddy_enterprise.response import Page
 from workbuddy_enterprise._serialization import as_mapping
 
 
-def parse_page(data: Any) -> Page[dict[str, Any]]:
+def parse_page(data: Any, *, item_keys: tuple[str, ...] | None = None) -> Page[dict[str, Any]]:
     payload = as_mapping(data)
-    items = payload.get("items") or payload.get("list") or payload.get("records") or []
-    if not isinstance(items, list):
-        items = []
-    return Page(
+    keys = item_keys or ("items", "list", "records", "users", "members")
+    items: list[Any] = []
+    for key in keys:
+        raw = payload.get(key)
+        if isinstance(raw, list):
+            items = raw
+            break
+    page = Page(
         items=[as_mapping(i) for i in items],
         total_count=_as_int(payload.get("totalCount", payload.get("total"))),
         page=_as_int(payload.get("page")),
@@ -23,6 +26,20 @@ def parse_page(data: Any) -> Page[dict[str, Any]]:
         next_page_token=_as_str(payload.get("nextPageToken")),
         extra=payload,
     )
+    # nested pagination object (dashboard member/data)
+    nested = payload.get("pagination")
+    if isinstance(nested, Mapping):
+        if page.total_count is None:
+            page.total_count = _as_int(nested.get("totalCount", nested.get("total")))
+        if page.page is None:
+            page.page = _as_int(nested.get("page"))
+        if page.page_num is None:
+            page.page_num = _as_int(nested.get("pageNum"))
+        if page.page_size is None:
+            page.page_size = _as_int(nested.get("pageSize"))
+        if page.next_page_token is None:
+            page.next_page_token = _as_str(nested.get("nextPageToken"))
+    return page
 
 
 def page_query(

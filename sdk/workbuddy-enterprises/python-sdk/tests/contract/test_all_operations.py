@@ -75,13 +75,13 @@ def _cases() -> list[tuple]:
 
     # users 4
     add("users.list", "GET", "/enterprises/ent-1/users", lambda c: c.users.list(page=1, page_size=20), query={"page": "1", "pageSize": "20"})
-    add("users.update", "POST", "/enterprises/ent-1/users/u1/update", lambda c: c.users.update("u1", user_name="a"), json_body={"userName": "a"})
-    add("users.delete", "POST", "/enterprises/ent-1/users/u1/delete", lambda c: c.users.delete("u1"), json_body={})
+    add("users.update", "POST", "/enterprises/ent-1/users/u1/update", lambda c: c.users.update("u1", user_enterprise_name="a"), json_body={"userEnterpriseName": "a"})
+    add("users.delete", "POST", "/enterprises/ent-1/users/u1/delete", lambda c: c.users.delete("u1"), no_body=True)
     add("users.update_password", "POST", "/enterprises/ent-1/users/u1/password/update", lambda c: c.users.update_password("u1", password="p"), json_body={"password": "p"})
 
     # members 2
     add("members.list", "GET", "/enterprises/ent-1/openapi/members", lambda c: c.members.list(page_num=1, page_size=20, keyword="k"), query={"pageNum": "1", "pageSize": "20", "keyword": "k"})
-    add("members.add", "POST", "/enterprises/ent-1/openapi/members/add", lambda c: c.members.add(["u1", "u2"]), json_body={"userIds": ["u1", "u2"]})
+    add("members.add", "POST", "/enterprises/ent-1/openapi/members/add", lambda c: c.members.add([{"username": "alice", "email": "a@example.com"}]), json_body={"members": [{"username": "alice", "email": "a@example.com"}]})
 
     # licenses 4
     add("licenses.overview", "GET", "/enterprises/ent-1/openapi/license/overview", lambda c: c.licenses.overview())
@@ -92,11 +92,11 @@ def _cases() -> list[tuple]:
     # usage 8
     add("usage.get_quota_cycle", "GET", "/enterprises/ent-1/openapi/usage/quota-cycle", lambda c: c.usage.get_quota_cycle())
     add("usage.get_default_quota", "GET", "/enterprises/ent-1/openapi/usage/default-quota", lambda c: c.usage.get_default_quota())
-    add("usage.update_default_quota", "POST", "/enterprises/ent-1/openapi/usage/default-quota/update", lambda c: c.usage.update_default_quota(quota=100), json_body={"quota": 100})
+    add("usage.update_default_quota", "POST", "/enterprises/ent-1/openapi/usage/default-quota/update", lambda c: c.usage.update_default_quota(limit_type="limited", new_limit=100), json_body={"limitType": "limited", "newLimit": 100})
     add("usage.query_members", "POST", "/enterprises/ent-1/openapi/usage/members/query", lambda c: c.usage.query_members(user_ids=["u1"]), json_body={"userIds": ["u1"]})
     add("usage.query_member_limits", "POST", "/enterprises/ent-1/openapi/usage/members/limit-query", lambda c: c.usage.query_member_limits(user_ids=["u1"]), json_body={"userIds": ["u1"]})
-    add("usage.update_member_quota", "POST", "/enterprises/ent-1/openapi/usage/members/quota/update", lambda c: c.usage.update_member_quota(items=[{"userId": "u1", "quota": 1}]), json_body={"items": [{"userId": "u1", "quota": 1}]})
-    add("usage.update_department_quota", "POST", "/enterprises/ent-1/openapi/usage/departments/d1/quota/update", lambda c: c.usage.update_department_quota("d1", quota=9), json_body={"quota": 9})
+    add("usage.update_member_quota", "POST", "/enterprises/ent-1/openapi/usage/members/quota/update", lambda c: c.usage.update_member_quota(limit_type="limited", user_ids=["u1"], new_limit=5000), json_body={"limitType": "limited", "userIds": ["u1"], "newLimit": 5000})
+    add("usage.update_department_quota", "POST", "/enterprises/ent-1/openapi/usage/departments/d1/quota/update", lambda c: c.usage.update_department_quota("d1", limit_type="limited", new_limit=9), json_body={"limitType": "limited", "newLimit": 9})
     add(
         "usage.query_member_details",
         "POST",
@@ -126,24 +126,24 @@ def _cases() -> list[tuple]:
     # models 13
     add("models.list_builtin", "GET", "/enterprises/ent-1/openapi/models/builtin", lambda c: c.models.list_builtin())
     add("models.set_builtin_enabled", "POST", "/enterprises/ent-1/openapi/models/builtin/m1/toggle", lambda c: c.models.set_builtin_enabled("m1", enabled=False), json_body={"enabled": False})
-    add("models.set_builtin_visibility", "POST", "/enterprises/ent-1/openapi/models/builtin/m1/visibility", lambda c: c.models.set_builtin_visibility("m1", type="all"), json_body={"type": "all"})
+    add("models.set_builtin_visibility", "POST", "/enterprises/ent-1/openapi/models/builtin/m1/visibility", lambda c: c.models.set_builtin_visibility("m1", scope="all"), json_body={"scope": "all"})
     add("models.list_custom", "GET", "/enterprises/ent-1/openapi/models/custom", lambda c: c.models.list_custom(page_num=1, page_size=20), query={"pageNum": "1", "pageSize": "20"})
     add("models.create_custom", "POST", "/enterprises/ent-1/openapi/models/custom", lambda c: c.models.create_custom(name="n", display_name="N"), json_body={"name": "n", "displayName": "N"})
     add("models.get_custom", "GET", "/enterprises/ent-1/openapi/models/custom/m2", lambda c: c.models.get_custom("m2"))
-    add("models.delete_custom", "POST", "/enterprises/ent-1/openapi/models/custom/m2/delete", lambda c: c.models.delete_custom("m2"), json_body={})
-    add("models.set_custom_visibility", "POST", "/enterprises/ent-1/openapi/models/custom/m2/visibility", lambda c: c.models.set_custom_visibility("m2", type="all"), json_body={"type": "all"})
+    add("models.delete_custom", "POST", "/enterprises/ent-1/openapi/models/custom/m2/delete", lambda c: c.models.delete_custom("m2"), no_body=True)
+    add("models.set_custom_visibility", "POST", "/enterprises/ent-1/openapi/models/custom/m2/visibility", lambda c: c.models.set_custom_visibility("m2", scope="all"), json_body={"scope": "all"})
     add("models.list_available", "GET", "/enterprises/ent-1/openapi/models/available", lambda c: c.models.list_available(user_id="u1"), query={"userId": "u1"})
     add("models.list", "GET", "/enterprises/ent-1/openapi/models", lambda c: c.models.list(source="custom", page_num=1, page_size=10), query={"source": "custom", "pageNum": "1", "pageSize": "10"})
     add("models.get", "GET", "/enterprises/ent-1/openapi/models/m3", lambda c: c.models.get("m3"))
     add("models.set_enabled", "POST", "/enterprises/ent-1/openapi/models/m3/toggle", lambda c: c.models.set_enabled("m3", enabled=True), json_body={"enabled": True})
-    add("models.set_visibility", "POST", "/enterprises/ent-1/openapi/models/m3/visibility", lambda c: c.models.set_visibility("m3", type="all"), json_body={"type": "all"})
+    add("models.set_visibility", "POST", "/enterprises/ent-1/openapi/models/m3/visibility", lambda c: c.models.set_visibility("m3", scope="all"), json_body={"scope": "all"})
 
     # skills 8
     add("skills.list", "GET", "/enterprises/ent-1/openapi/skills", lambda c: c.skills.list(source=SkillSource.CUSTOM, page_num=1, page_size=20), query={"source": "custom", "pageNum": "1", "pageSize": "20"})
     add("skills.create", "POST", "/enterprises/ent-1/openapi/skills", lambda c: c.skills.create(name="n", display_name="N", publish_status="draft"), multipart=True)
     add("skills.get", "GET", "/enterprises/ent-1/openapi/skills/sk-1", lambda c: c.skills.get("sk-1"))
     add("skills.update", "POST", "/enterprises/ent-1/openapi/skills/sk-1/update", lambda c: c.skills.update("sk-1", version="1.1.0"), multipart=True)
-    add("skills.delete", "POST", "/enterprises/ent-1/openapi/skills/sk-1/delete", lambda c: c.skills.delete("sk-1"), json_body={})
+    add("skills.delete", "POST", "/enterprises/ent-1/openapi/skills/sk-1/delete", lambda c: c.skills.delete("sk-1"), no_body=True)
     add("skills.set_enabled", "POST", "/enterprises/ent-1/openapi/skills/sk-1/toggle", lambda c: c.skills.set_enabled("sk-1", source="custom", enabled=False, disabled_reason="x"), query={"source": "custom"}, json_body={"enabled": False, "disabledReason": "x"})
     add("skills.set_visibility", "POST", "/enterprises/ent-1/openapi/skills/sk-1/visibility", lambda c: c.skills.set_visibility("sk-1", source="custom", type="all"), query={"source": "custom"}, json_body={"type": "all"})
     add("skills.get_visibility", "GET", "/enterprises/ent-1/openapi/skills/sk-1/visibility", lambda c: c.skills.get_visibility("sk-1", source="custom"), query={"source": "custom"})
@@ -152,7 +152,7 @@ def _cases() -> list[tuple]:
     add("skill_categories.list", "GET", "/enterprises/ent-1/openapi/skill-categories", lambda c: c.skill_categories.list())
     add("skill_categories.create", "POST", "/enterprises/ent-1/openapi/skill-categories", lambda c: c.skill_categories.create(name="研发", sort_order=1), json_body={"name": "研发", "sortOrder": 1})
     add("skill_categories.update", "POST", "/enterprises/ent-1/openapi/skill-categories/10/update", lambda c: c.skill_categories.update(10, name="x"), json_body={"name": "x"})
-    add("skill_categories.delete", "POST", "/enterprises/ent-1/openapi/skill-categories/10/delete", lambda c: c.skill_categories.delete(10), json_body={})
+    add("skill_categories.delete", "POST", "/enterprises/ent-1/openapi/skill-categories/10/delete", lambda c: c.skill_categories.delete(10), no_body=True)
     add("skill_categories.reorder", "POST", "/enterprises/ent-1/openapi/skill-categories/reorder", lambda c: c.skill_categories.reorder([3, 1, 2]), json_body={"orderedIds": [3, 1, 2]})
 
     # experts 8
@@ -160,7 +160,7 @@ def _cases() -> list[tuple]:
     add("experts.create", "POST", "/enterprises/ent-1/openapi/experts", lambda c: c.experts.create(name="n", display_name="N"), multipart=True)
     add("experts.get", "GET", "/enterprises/ent-1/openapi/experts/ex-1", lambda c: c.experts.get("ex-1"))
     add("experts.update", "POST", "/enterprises/ent-1/openapi/experts/ex-1/update", lambda c: c.experts.update("ex-1", version="1.0.1"), multipart=True)
-    add("experts.delete", "POST", "/enterprises/ent-1/openapi/experts/ex-1/delete", lambda c: c.experts.delete("ex-1"), json_body={})
+    add("experts.delete", "POST", "/enterprises/ent-1/openapi/experts/ex-1/delete", lambda c: c.experts.delete("ex-1"), no_body=True)
     add("experts.set_enabled", "POST", "/enterprises/ent-1/openapi/experts/ex-1/toggle", lambda c: c.experts.set_enabled("ex-1", source="custom", enabled=True), query={"source": "custom"}, json_body={"enabled": True})
     add("experts.set_visibility", "POST", "/enterprises/ent-1/openapi/experts/ex-1/visibility", lambda c: c.experts.set_visibility("ex-1", source="custom", type="all"), query={"source": "custom"}, json_body={"type": "all"})
     add("experts.get_visibility", "GET", "/enterprises/ent-1/openapi/experts/ex-1/visibility", lambda c: c.experts.get_visibility("ex-1", source="custom"), query={"source": "custom"})
@@ -169,13 +169,13 @@ def _cases() -> list[tuple]:
     add("expert_categories.list", "GET", "/enterprises/ent-1/openapi/expert-categories", lambda c: c.expert_categories.list())
     add("expert_categories.create", "POST", "/enterprises/ent-1/openapi/expert-categories", lambda c: c.expert_categories.create(name="e"), json_body={"name": "e"})
     add("expert_categories.update", "POST", "/enterprises/ent-1/openapi/expert-categories/2/update", lambda c: c.expert_categories.update(2, description="d"), json_body={"description": "d"})
-    add("expert_categories.delete", "POST", "/enterprises/ent-1/openapi/expert-categories/2/delete", lambda c: c.expert_categories.delete(2), json_body={})
+    add("expert_categories.delete", "POST", "/enterprises/ent-1/openapi/expert-categories/2/delete", lambda c: c.expert_categories.delete(2), no_body=True)
     add("expert_categories.reorder", "POST", "/enterprises/ent-1/openapi/expert-categories/reorder", lambda c: c.expert_categories.reorder([1, 2]), json_body={"orderedIds": [1, 2]})
 
     # analytics 8
-    add("analytics.metrics_download_url_v2", "GET", "/enterprises/ent-1/metrics/download_url/v2", lambda c: c.analytics.metrics_download_url_v2(queries="q1"))
-    add("analytics.metrics_download_url", "GET", "/enterprises/ent-1/metrics/download_url", lambda c: c.analytics.metrics_download_url(queries="q1"))
-    add("analytics.metrics", "GET", "/enterprises/ent-1/metrics", lambda c: c.analytics.metrics(queries="q1"))
+    add("analytics.metrics_download_url_v2", "GET", "/enterprises/ent-1/metrics/download_url/v2", lambda c: c.analytics.metrics_download_url_v2(queries="q1", range_start="2025-03-20 00:00:00", range_end="2025-03-20 00:00:00", range_step=86400), query={"queries": "q1", "range.start": "2025-03-20 00:00:00", "range.end": "2025-03-20 00:00:00", "range.step": "86400"})
+    add("analytics.metrics_download_url", "GET", "/enterprises/ent-1/metrics/download_url", lambda c: c.analytics.metrics_download_url(queries="q1", range_start="2025-03-20 00:00:00", range_end="2025-03-20 00:00:00", range_step=86400), query={"queries": "q1", "range.start": "2025-03-20 00:00:00", "range.end": "2025-03-20 00:00:00", "range.step": "86400"})
+    add("analytics.metrics", "GET", "/enterprises/ent-1/metrics", lambda c: c.analytics.metrics(queries="q1", range_start="2025-03-20 00:00:00", range_end="2025-03-20 00:00:00", range_step=86400), query={"queries": "q1", "range.start": "2025-03-20 00:00:00", "range.end": "2025-03-20 00:00:00", "range.step": "86400"})
     add("analytics.activity", "POST", "/enterprises/ent-1/dashboard/analytics/activity", lambda c: c.analytics.activity({"foo": 1}), json_body={"foo": 1})
     add("analytics.dialog", "POST", "/enterprises/ent-1/dashboard/analytics/dialog", lambda c: c.analytics.dialog({"foo": 1}), json_body={"foo": 1})
     add("analytics.completion", "POST", "/enterprises/ent-1/dashboard/analytics/completion", lambda c: c.analytics.completion({"foo": 1}), json_body={"foo": 1})

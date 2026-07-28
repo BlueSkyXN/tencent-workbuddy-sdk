@@ -1,10 +1,10 @@
-
 from __future__ import annotations
 
 from typing import Any, Mapping, Sequence
 
 from workbuddy_enterprise.resources._base import Resource
 from workbuddy_enterprise.response import ApiResponse, Page
+from workbuddy_enterprise.pagination import parse_page
 from workbuddy_enterprise._serialization import clean_dict
 
 
@@ -15,8 +15,23 @@ class UsageResource(Resource):
     def get_default_quota(self) -> ApiResponse[dict[str, Any]]:
         return self._as_map(self._get("/openapi/usage/default-quota"))
 
-    def update_default_quota(self, **fields: Any) -> ApiResponse[dict[str, Any]]:
-        return self._as_map(self._post_json("/openapi/usage/default-quota/update", body=clean_dict(fields)))
+    def update_default_quota(
+        self,
+        *,
+        limit_type: str,
+        new_limit: int | None = None,
+        cycle_type: str | None = None,
+        **fields: Any,
+    ) -> ApiResponse[dict[str, Any]]:
+        body = clean_dict(
+            {
+                "limitType": limit_type,
+                "newLimit": new_limit,
+                "cycleType": cycle_type,
+                **fields,
+            }
+        )
+        return self._as_map(self._post_json("/openapi/usage/default-quota/update", body=body))
 
     def query_members(self, *, user_ids: Sequence[str] | None = None, **fields: Any) -> ApiResponse[dict[str, Any]]:
         body = clean_dict({"userIds": list(user_ids) if user_ids is not None else None, **fields})
@@ -26,15 +41,49 @@ class UsageResource(Resource):
         body = clean_dict({"userIds": list(user_ids) if user_ids is not None else None, **fields})
         return self._as_map(self._post_json("/openapi/usage/members/limit-query", body=body))
 
-    def update_member_quota(self, *, items: Sequence[Mapping[str, Any]] | None = None, **fields: Any) -> ApiResponse[dict[str, Any]]:
-        body = clean_dict({"items": list(items) if items is not None else None, **fields})
+    def update_member_quota(
+        self,
+        *,
+        limit_type: str,
+        user_ids: Sequence[str] | None = None,
+        user_names: Sequence[str] | None = None,
+        new_limit: int | None = None,
+        cycle_type: str | None = None,
+        **fields: Any,
+    ) -> ApiResponse[dict[str, Any]]:
+        body = clean_dict(
+            {
+                "limitType": limit_type,
+                "userIds": list(user_ids) if user_ids is not None else None,
+                "userNames": list(user_names) if user_names is not None else None,
+                "newLimit": new_limit,
+                "cycleType": cycle_type,
+                **fields,
+            }
+        )
         return self._as_map(self._post_json("/openapi/usage/members/quota/update", body=body))
 
-    def update_department_quota(self, department_id: str, **fields: Any) -> ApiResponse[dict[str, Any]]:
+    def update_department_quota(
+        self,
+        department_id: str,
+        *,
+        limit_type: str,
+        new_limit: int | None = None,
+        cycle_type: str | None = None,
+        **fields: Any,
+    ) -> ApiResponse[dict[str, Any]]:
+        body = clean_dict(
+            {
+                "limitType": limit_type,
+                "newLimit": new_limit,
+                "cycleType": cycle_type,
+                **fields,
+            }
+        )
         return self._as_map(
             self._post_json(
                 f"/openapi/usage/departments/{department_id}/quota/update",
-                body=clean_dict(fields),
+                body=body,
             )
         )
 

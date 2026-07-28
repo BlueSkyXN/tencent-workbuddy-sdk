@@ -9,7 +9,7 @@
 
 触发：
 
-- `push` / `pull_request`（按 path filter）  
+- `push` / `pull_request`（`rust-sdk.yml` 带 path filter；`ci.yml` 当前为全量触发）  
 - `workflow_dispatch` 可手动跑  
 
 ## Python 产物
@@ -60,6 +60,6 @@ gh run download <run-id> --repo BlueSkyXN/tencent-workbuddy-sdk -n workbuddy-cli
 |---|---|
 | Python contract/unit 绿 | mock 合同与基础单元通过 |
 | Rust fmt/clippy/test/release 绿 | 代码可编译、基础测试过、CLI 可打包 |
-| 不自动证明 | 全部 73 个写接口已在你的企业环境 live 验证 |
+| 不自动证明 | 全部 73 个 operation 已在真实企业环境 live 验证（含写接口） |
 
 live 只读/写操作仍需显式凭据与授权。

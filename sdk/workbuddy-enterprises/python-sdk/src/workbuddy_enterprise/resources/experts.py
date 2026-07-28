@@ -74,6 +74,8 @@ class ExpertsResource(Resource):
         try:
             if files is None:
                 multipart_files = {k: (None, str(v)) for k, v in data.items()}
+                if not multipart_files:
+                    multipart_files = {"_": (None, "")}
                 resp = self._post_multipart("/openapi/experts", files=multipart_files)
             else:
                 resp = self._post_multipart("/openapi/experts", data=data, files=files)
@@ -131,6 +133,8 @@ class ExpertsResource(Resource):
         try:
             if files is None:
                 multipart_files = {k: (None, str(v)) for k, v in data.items()}
+                if not multipart_files:
+                    multipart_files = {"_": (None, "")}
                 resp = self._post_multipart(f"/openapi/experts/{expert_ref}/update", files=multipart_files)
             else:
                 resp = self._post_multipart(
@@ -142,7 +146,7 @@ class ExpertsResource(Resource):
         return self._as_map(resp)
 
     def delete(self, expert_ref: str) -> ApiResponse[dict[str, Any]]:
-        return self._as_map(self._post_json(f"/openapi/experts/{expert_ref}/delete", body={}))
+        return self._as_map(self._post_json(f"/openapi/experts/{expert_ref}/delete", body=None, send_json=False))
 
     def set_enabled(
         self,

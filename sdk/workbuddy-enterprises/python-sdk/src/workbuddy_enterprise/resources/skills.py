@@ -136,6 +136,8 @@ class SkillsResource(Resource):
         try:
             if files is None:
                 multipart_files = {k: (None, str(v)) for k, v in data.items()}
+                if not multipart_files:
+                    multipart_files = {"_": (None, "")}
                 resp = self._post_multipart(f"/openapi/skills/{skill_ref}/update", files=multipart_files)
             else:
                 resp = self._post_multipart(
@@ -147,7 +149,7 @@ class SkillsResource(Resource):
         return self._as_map(resp)
 
     def delete(self, skill_ref: str) -> ApiResponse[dict[str, Any]]:
-        resp = self._post_json(f"/openapi/skills/{skill_ref}/delete", body={})
+        resp = self._post_json(f"/openapi/skills/{skill_ref}/delete", body=None, send_json=False)
         return self._as_map(resp)
 
     def set_enabled(

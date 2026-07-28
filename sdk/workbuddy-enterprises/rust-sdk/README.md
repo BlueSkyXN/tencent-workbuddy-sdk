@@ -53,7 +53,14 @@ let client = Client::from_client_credentials(
     "client-secret",
     "enterprise-id",
 )?;
-let page = client.skills().list(SkillSource::Custom, None, None, Some(1), Some(20))?;
+let page = client.skills().list(
+    SkillSource::Custom,
+    None,
+    None,
+    None,
+    Some(1),
+    Some(20),
+)?;
 println!("total={:?}", page.total_count);
 ```
 
