@@ -8,7 +8,7 @@ use crate::resources::{
 use crate::response::{parse_page, ApiResponse, Page, WireEnvelope};
 use reqwest::blocking::{multipart, Client as HttpClient};
 use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION};
-use serde_json::{json, Value};
+use serde_json::Value;
 use std::collections::HashMap;
 use std::path::Path;
 use std::time::Duration;
