@@ -414,7 +414,7 @@ fn render_operation_suffix(
 #[rustfmt::skip]
 fn validate_query(spec: &OperationSpec, query: &HashMap<String, String>) -> Result<(), String> {
     for name in spec.required_query {
-        if !query.get(*name).is_some_and(|value| !value.is_empty()) {
+        if query.get(*name).is_none_or(|value| value.is_empty()) {
             return Err(format!("{} requires --query {name}=...", spec.name));
         }
     }
