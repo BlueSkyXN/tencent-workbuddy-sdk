@@ -1,5 +1,6 @@
 use crate::client::{push_q, push_qi, Client};
 use crate::error::Result;
+use crate::operations::validate_json_operation;
 use crate::response::{parse_page_with_keys, ApiResponse, Page};
 use serde_json::Value;
 
@@ -54,26 +55,31 @@ impl AnalyticsResource<'_> {
     }
 
     pub fn activity(&self, body: Value) -> Result<ApiResponse<Value>> {
+        validate_json_operation("analytics-activity", &body)?;
         self.client
             .post_json("/dashboard/analytics/activity", &[], body)
     }
 
     pub fn dialog(&self, body: Value) -> Result<ApiResponse<Value>> {
+        validate_json_operation("analytics-dialog", &body)?;
         self.client
             .post_json("/dashboard/analytics/dialog", &[], body)
     }
 
     pub fn completion(&self, body: Value) -> Result<ApiResponse<Value>> {
+        validate_json_operation("analytics-completion", &body)?;
         self.client
             .post_json("/dashboard/analytics/completion", &[], body)
     }
 
     pub fn generation(&self, body: Value) -> Result<ApiResponse<Value>> {
+        validate_json_operation("analytics-generation", &body)?;
         self.client
             .post_json("/dashboard/analytics/generation", &[], body)
     }
 
     pub fn member_data(&self, body: Value) -> Result<ApiResponse<Page<Value>>> {
+        validate_json_operation("analytics-member-data", &body)?;
         let resp = self.client.post_json("/dashboard/member/data", &[], body)?;
         let page = parse_page_with_keys(resp.data, &["members", "items", "list", "records"]);
         Ok(ApiResponse {

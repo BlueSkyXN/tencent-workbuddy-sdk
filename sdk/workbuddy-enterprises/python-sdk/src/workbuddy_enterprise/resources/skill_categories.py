@@ -1,11 +1,11 @@
 
 from __future__ import annotations
 
-from typing import Any, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 from workbuddy_enterprise.resources._base import Resource
 from workbuddy_enterprise.response import ApiResponse, Page
-from workbuddy_enterprise.pagination import parse_page
 from workbuddy_enterprise.schemas.skills import SkillSummary  # noqa: F401
 
 
@@ -43,11 +43,11 @@ class SkillCategoriesResource(Resource):
             body["description"] = description
         if sort_order is not None:
             body["sortOrder"] = sort_order
-        resp = self._post_json(f"/openapi/skill-categories/{category_id}/update", body=body)
+        resp = self._post_json(f"/openapi/skill-categories/{self._segment(category_id)}/update", body=body)
         return ApiResponse(None, resp.code, resp.message, resp.request_id, resp.raw)
 
     def delete(self, category_id: int) -> ApiResponse[dict[str, Any]]:
-        return self._as_map(self._post_json(f"/openapi/skill-categories/{category_id}/delete", body=None, send_json=False))
+        return self._as_map(self._post_json(f"/openapi/skill-categories/{self._segment(category_id)}/delete", body=None, send_json=False))
 
     def reorder(self, ordered_ids: Sequence[int]) -> ApiResponse[None]:
         resp = self._post_json(

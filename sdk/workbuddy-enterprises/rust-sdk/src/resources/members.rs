@@ -1,5 +1,6 @@
 use crate::client::{push_q, push_qi, Client};
 use crate::error::Result;
+use crate::operations::validate_json_operation;
 use crate::response::ApiResponse;
 use serde_json::{json, Value};
 
@@ -32,11 +33,13 @@ impl MembersResource<'_> {
         if let Some(g) = grant_license {
             body.insert("grantLicense".into(), json!(g));
         }
-        self.client
-            .post_json("/openapi/members/add", &[], Value::Object(body))
+        let body = Value::Object(body);
+        validate_json_operation("members-add", &body)?;
+        self.client.post_json("/openapi/members/add", &[], body)
     }
 
     pub fn add_raw(&self, body: Value) -> Result<ApiResponse<Value>> {
+        validate_json_operation("members-add", &body)?;
         self.client.post_json("/openapi/members/add", &[], body)
     }
 }

@@ -1,5 +1,6 @@
 use crate::client::Client;
 use crate::error::Result;
+use crate::operations::validate_json_operation;
 use crate::response::ApiResponse;
 use serde_json::{json, Value};
 
@@ -26,11 +27,14 @@ impl SkillCategoriesResource<'_> {
         if let Some(s) = sort_order {
             body.insert("sortOrder".into(), json!(s));
         }
+        let body = Value::Object(body);
+        validate_json_operation("skill-categories-create", &body)?;
         self.client
-            .post_json("/openapi/skill-categories", &[], Value::Object(body))
+            .post_json("/openapi/skill-categories", &[], body)
     }
 
     pub fn update(&self, category_id: i64, body: Value) -> Result<ApiResponse<Value>> {
+        validate_json_operation("skill-categories-update", &body)?;
         self.client.post_json(
             &format!("/openapi/skill-categories/{category_id}/update"),
             &[],
@@ -46,10 +50,9 @@ impl SkillCategoriesResource<'_> {
     }
 
     pub fn reorder(&self, ordered_ids: &[i64]) -> Result<ApiResponse<Value>> {
-        self.client.post_json(
-            "/openapi/skill-categories/reorder",
-            &[],
-            json!({ "orderedIds": ordered_ids }),
-        )
+        let body = json!({ "orderedIds": ordered_ids });
+        validate_json_operation("skill-categories-reorder", &body)?;
+        self.client
+            .post_json("/openapi/skill-categories/reorder", &[], body)
     }
 }

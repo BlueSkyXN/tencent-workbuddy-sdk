@@ -4,11 +4,13 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, BinaryIO, Mapping
+from typing import Any, BinaryIO
 
 import httpx
 
+from workbuddy_enterprise._serialization import clean_dict
 from workbuddy_enterprise.auth import AuthConfig, TokenProvider
 from workbuddy_enterprise.errors import (
     WorkBuddyAPIError,
@@ -16,7 +18,6 @@ from workbuddy_enterprise.errors import (
     WorkBuddyTimeoutError,
 )
 from workbuddy_enterprise.response import ApiResponse
-from workbuddy_enterprise._serialization import clean_dict
 
 
 class Transport:
@@ -83,7 +84,7 @@ class Transport:
                 if attempt + 1 >= attempts:
                     if isinstance(exc, WorkBuddyTimeoutError):
                         raise
-                    raise WorkBuddyTimeoutError(str(exc)) from exc
+                    raise WorkBuddyHTTPError(str(exc), http_status=0) from exc
         assert last_exc is not None
         raise last_exc
 
@@ -121,6 +122,8 @@ class Transport:
             )
         except httpx.TimeoutException as exc:
             raise WorkBuddyTimeoutError("Request timed out") from exc
+        except httpx.TransportError:
+            raise
         except httpx.HTTPError as exc:
             raise WorkBuddyHTTPError(str(exc), http_status=0) from exc
 
@@ -132,7 +135,7 @@ class Transport:
         else:
             try:
                 body = resp.json()
-            except json.JSONDecodeError as exc:
+            except (json.JSONDecodeError, UnicodeDecodeError) as exc:
                 if expect_json:
                     raise WorkBuddyHTTPError(
                         "Response is not valid JSON",

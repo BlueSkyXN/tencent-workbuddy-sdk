@@ -24,8 +24,19 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install -e ".[dev]"
-      - name: Unit + contract tests
+      - name: Download authoritative OpenAPI contract
+        run: |
+          curl --fail --silent --show-error --location --retry 3 \
+            --output "${RUNNER_TEMP}/codebuddy-openapi-api.yaml" \
+            https://www.codebuddy.cn/apiDocs/api.yaml
+      - name: Unit + Python/Rust OpenAPI contract tests
         run: python -m pytest tests/unit tests/contract
+        env:
+          WORKBUDDY_OPENAPI_SPEC: ${{ runner.temp }}/codebuddy-openapi-api.yaml
+      - name: Lint and type check
+        run: |
+          python -m ruff check src tests tools examples
+          python -m mypy src/workbuddy_enterprise
       - name: Build sdist and wheel
         if: matrix.python-version == '3.12'
         run: |

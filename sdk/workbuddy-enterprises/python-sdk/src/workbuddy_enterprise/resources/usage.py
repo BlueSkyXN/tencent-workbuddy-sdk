@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from typing import Any, Mapping, Sequence
+from collections.abc import Mapping, Sequence
+from typing import Any
 
+from workbuddy_enterprise._serialization import clean_dict
 from workbuddy_enterprise.resources._base import Resource
 from workbuddy_enterprise.response import ApiResponse, Page
-from workbuddy_enterprise.pagination import parse_page
-from workbuddy_enterprise._serialization import clean_dict
 
 
 class UsageResource(Resource):
@@ -29,16 +29,52 @@ class UsageResource(Resource):
                 "newLimit": new_limit,
                 "cycleType": cycle_type,
                 **fields,
-            }
+            },
         )
         return self._as_map(self._post_json("/openapi/usage/default-quota/update", body=body))
 
-    def query_members(self, *, user_ids: Sequence[str] | None = None, **fields: Any) -> ApiResponse[dict[str, Any]]:
-        body = clean_dict({"userIds": list(user_ids) if user_ids is not None else None, **fields})
+    def query_members(
+        self,
+        *,
+        user_ids: Sequence[str] | None = None,
+        user_names: Sequence[str] | None = None,
+        page_num: int | None = None,
+        page_size: int | None = None,
+        start_time: str | None = None,
+        end_time: str | None = None,
+        **fields: Any,
+    ) -> ApiResponse[dict[str, Any]]:
+        body = clean_dict(
+            {
+                "userIds": list(user_ids) if user_ids is not None else None,
+                "userNames": list(user_names) if user_names is not None else None,
+                "pageNum": page_num,
+                "pageSize": page_size,
+                "startTime": start_time,
+                "endTime": end_time,
+                **fields,
+            },
+        )
         return self._as_map(self._post_json("/openapi/usage/members/query", body=body))
 
-    def query_member_limits(self, *, user_ids: Sequence[str] | None = None, **fields: Any) -> ApiResponse[dict[str, Any]]:
-        body = clean_dict({"userIds": list(user_ids) if user_ids is not None else None, **fields})
+    def query_member_limits(
+        self,
+        *,
+        user_ids: Sequence[str] | None = None,
+        user_names: Sequence[str] | None = None,
+        page_num: int | None = None,
+        page_size: int | None = None,
+        **fields: Any,
+    ) -> ApiResponse[dict[str, Any]]:
+        body = clean_dict(
+            {
+                "userIds": list(user_ids) if user_ids is not None else None,
+                "userNames": list(user_names) if user_names is not None else None,
+                "pageNum": page_num,
+                "pageSize": page_size,
+                **fields,
+            },
+        )
         return self._as_map(self._post_json("/openapi/usage/members/limit-query", body=body))
 
     def update_member_quota(
@@ -59,7 +95,7 @@ class UsageResource(Resource):
                 "newLimit": new_limit,
                 "cycleType": cycle_type,
                 **fields,
-            }
+            },
         )
         return self._as_map(self._post_json("/openapi/usage/members/quota/update", body=body))
 
@@ -78,13 +114,13 @@ class UsageResource(Resource):
                 "newLimit": new_limit,
                 "cycleType": cycle_type,
                 **fields,
-            }
+            },
         )
         return self._as_map(
             self._post_json(
-                f"/openapi/usage/departments/{department_id}/quota/update",
+                f"/openapi/usage/departments/{self._segment(department_id)}/quota/update",
                 body=body,
-            )
+            ),
         )
 
     def query_member_details(
@@ -115,9 +151,11 @@ class UsageResource(Resource):
                 "version": version,
                 "pageToken": page_token,
                 **fields,
-            }
+            },
         )
         resp = self._post_json("/openapi/usage/members/detail", body=body)
         if isinstance(resp.data, dict) and ("items" in resp.data or "nextPageToken" in resp.data):
-            return self._as_page(resp)
-        return self._as_map(resp)
+            data: Page[dict[str, Any]] | dict[str, Any] = self._as_page(resp).data
+        else:
+            data = self._as_map(resp).data
+        return self._with_data(resp, data)

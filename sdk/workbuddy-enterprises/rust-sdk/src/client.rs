@@ -1,5 +1,6 @@
 use crate::auth::{ClientConfig, TokenProvider, DEFAULT_BASE_URL, DEFAULT_TOKEN_URL};
 use crate::error::{Error, Result};
+use crate::operations::{validate_json_operation, validate_multipart_operation};
 use crate::resources::{
     AnalyticsResource, EnterpriseResource, ExpertCategoriesResource, ExpertsResource,
     GroupsResource, LicensesResource, MembersResource, ModelsResource, SkillCategoriesResource,
@@ -120,15 +121,14 @@ impl Client {
         format!("/enterprises/{eid}{suffix}")
     }
 
-    pub(crate) fn get_json(
-        &self,
-        suffix: &str,
-        query: &[(String, String)],
-    ) -> Result<ApiResponse<Value>> {
+    /// Executes a known Enterprise OpenAPI GET suffix under this client's enterprise.
+    /// Prefer resource methods when their typed convenience signature covers the request.
+    pub fn get_json(&self, suffix: &str, query: &[(String, String)]) -> Result<ApiResponse<Value>> {
         self.request("GET", suffix, query, None, None)
     }
 
-    pub(crate) fn post_empty(
+    /// Executes a known Enterprise OpenAPI POST suffix with no request body.
+    pub fn post_empty(
         &self,
         suffix: &str,
         query: &[(String, String)],
@@ -136,6 +136,7 @@ impl Client {
         self.request("POST", suffix, query, None, None)
     }
 
+    /// Executes a known Enterprise OpenAPI POST suffix with an application/json body.
     pub(crate) fn post_json(
         &self,
         suffix: &str,
@@ -145,6 +146,19 @@ impl Client {
         self.request("POST", suffix, query, Some(body), None)
     }
 
+    /// Validates a registry operation's JSON body contract, then sends it to the supplied suffix.
+    pub fn post_operation_json(
+        &self,
+        operation: &str,
+        suffix: &str,
+        query: &[(String, String)],
+        body: Value,
+    ) -> Result<ApiResponse<Value>> {
+        validate_json_operation(operation, &body)?;
+        self.post_json(suffix, query, body)
+    }
+
+    /// Sends a multipart form after a resource or registry helper validates it.
     pub(crate) fn post_multipart(
         &self,
         suffix: &str,
@@ -161,6 +175,18 @@ impl Client {
                 .map_err(|e| Error::Io(format!("open package file: {e}")))?;
         }
         self.request("POST", suffix, &[], None, Some(form))
+    }
+
+    /// Validates a registry operation's multipart fields, then sends them to the supplied suffix.
+    pub fn post_operation_multipart(
+        &self,
+        operation: &str,
+        suffix: &str,
+        fields: &HashMap<String, String>,
+        file_path: Option<&Path>,
+    ) -> Result<ApiResponse<Value>> {
+        validate_multipart_operation(operation, fields, file_path.is_some())?;
+        self.post_multipart(suffix, fields, file_path)
     }
 
     pub(crate) fn get_page(
@@ -325,7 +351,7 @@ pub(crate) fn push_qb(q: &mut Vec<(String, String)>, key: &str, value: Option<bo
     }
 }
 
-fn encode_path_segment(s: &str) -> String {
+pub fn encode_path_segment(s: &str) -> String {
     let mut out = String::with_capacity(s.len());
     for b in s.bytes() {
         match b {

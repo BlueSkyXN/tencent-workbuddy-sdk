@@ -1,4 +1,4 @@
-use crate::client::{push_q, push_qi, Client};
+use crate::client::{encode_path_segment, push_q, push_qi, Client};
 use crate::error::Result;
 use crate::response::ApiResponse;
 use crate::types::{PublishStatus, SkillSource, VisibilityType};
@@ -11,6 +11,7 @@ pub struct ExpertsResource<'a> {
 }
 
 impl ExpertsResource<'_> {
+    /// `category_id` is the decimal OpenAPI category ID serialized as a query value.
     pub fn list(
         &self,
         source: SkillSource,
@@ -23,7 +24,7 @@ impl ExpertsResource<'_> {
         let mut q = Vec::new();
         push_q(&mut q, "source", Some(source.as_str().to_string()));
         push_q(&mut q, "keyword", keyword.map(|s| s.to_string()));
-        push_q(&mut q, "categoryId", category_id.map(|s| s.to_string()));
+        push_q(&mut q, "categoryId", category_id.map(str::to_string));
         push_q(
             &mut q,
             "publishStatus",
@@ -35,6 +36,7 @@ impl ExpertsResource<'_> {
     }
 
     pub fn get(&self, expert_ref: &str) -> Result<ApiResponse<Value>> {
+        let expert_ref = encode_path_segment(expert_ref);
         self.client
             .get_json(&format!("/openapi/experts/{expert_ref}"), &[])
     }
@@ -50,7 +52,7 @@ impl ExpertsResource<'_> {
         fields.insert("name".into(), name.into());
         fields.insert("displayName".into(), display_name.into());
         self.client
-            .post_multipart("/openapi/experts", &fields, package)
+            .post_operation_multipart("experts-create", "/openapi/experts", &fields, package)
     }
 
     pub fn update(
@@ -59,7 +61,9 @@ impl ExpertsResource<'_> {
         package: Option<&Path>,
         fields: HashMap<String, String>,
     ) -> Result<ApiResponse<Value>> {
-        self.client.post_multipart(
+        let expert_ref = encode_path_segment(expert_ref);
+        self.client.post_operation_multipart(
+            "experts-update",
             &format!("/openapi/experts/{expert_ref}/update"),
             &fields,
             package,
@@ -67,6 +71,7 @@ impl ExpertsResource<'_> {
     }
 
     pub fn delete(&self, expert_ref: &str) -> Result<ApiResponse<Value>> {
+        let expert_ref = encode_path_segment(expert_ref);
         self.client
             .post_empty(&format!("/openapi/experts/{expert_ref}/delete"), &[])
     }
@@ -78,6 +83,7 @@ impl ExpertsResource<'_> {
         enabled: bool,
         disabled_reason: Option<&str>,
     ) -> Result<ApiResponse<Value>> {
+        let expert_ref = encode_path_segment(expert_ref);
         let q = vec![("source".into(), source.as_str().into())];
         let mut body = serde_json::Map::new();
         body.insert("enabled".into(), json!(enabled));
@@ -98,6 +104,7 @@ impl ExpertsResource<'_> {
         visibility_type: VisibilityType,
         scopes: Option<Value>,
     ) -> Result<ApiResponse<Value>> {
+        let expert_ref = encode_path_segment(expert_ref);
         let q = vec![("source".into(), source.as_str().into())];
         let mut body = serde_json::Map::new();
         body.insert("type".into(), json!(visibility_type.as_str()));
@@ -116,6 +123,7 @@ impl ExpertsResource<'_> {
         expert_ref: &str,
         source: SkillSource,
     ) -> Result<ApiResponse<Value>> {
+        let expert_ref = encode_path_segment(expert_ref);
         let q = vec![("source".into(), source.as_str().into())];
         self.client
             .get_json(&format!("/openapi/experts/{expert_ref}/visibility"), &q)

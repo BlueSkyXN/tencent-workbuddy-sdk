@@ -3,7 +3,8 @@
 **非官方** CodeBuddy / WorkBuddy **企业 OpenAPI** 多语言客户端工作区。
 
 > Not an official Tencent package.  
-> 覆盖企业管理 REST（skills / models / members / usage 等），**不是** Agent Runtime / AgentOS SDK。
+> 覆盖当前官方 `api.yaml` 的 66 paths / 73 operations（skills / models / members / usage 等），
+> **不是** Agent Runtime / AgentOS SDK。
 
 ## 文档入口
 
@@ -53,13 +54,14 @@ python -m pytest tests/unit tests/contract
 
 - 库名：`workbuddy_enterprise`
 - CLI：`workbuddy`（从 Actions artifact `workbuddy-cli-linux-x64` 下载）
+- 完整 CLI 入口：`workbuddy api <operation>`；用 `workbuddy operations` 查看 73 个 registry name
 - **默认禁止本机 `cargo build/test/run`**，详见 [docs/local-disk-and-ci-builds.md](docs/local-disk-and-ci-builds.md)
 
 ## CI
 
 | Workflow | 作用 |
 |---|---|
-| `ci` | Python 测试与 wheel |
+| `ci` | 官方 YAML 对照、Python 测试、Ruff/Mypy 与 wheel |
 | `rust-sdk` | Rust 检查、测试、release CLI artifact |
 
 详情：[docs/ci-and-artifacts.md](docs/ci-and-artifacts.md)

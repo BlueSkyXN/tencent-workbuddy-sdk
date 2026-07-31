@@ -1,16 +1,18 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from pathlib import Path
-from typing import Any, BinaryIO, Mapping
+from typing import Any, BinaryIO
 
+from workbuddy_enterprise._serialization import clean_dict, dump_value
+from workbuddy_enterprise._transport import open_package_file
+from workbuddy_enterprise.errors import WorkBuddyConfigError
 from workbuddy_enterprise.pagination import page_query
 from workbuddy_enterprise.resources._base import Resource
 from workbuddy_enterprise.response import ApiResponse, Page
 from workbuddy_enterprise.schemas.common import VisibilityScope, VisibilitySpec
 from workbuddy_enterprise.types import PublishStatus, SkillSource, VisibilityType
-from workbuddy_enterprise._transport import open_package_file
-from workbuddy_enterprise._serialization import clean_dict, dump_value
 
 
 class ExpertsResource(Resource):
@@ -68,14 +70,14 @@ class ExpertsResource(Resource):
                 "agentName": agent_name,
                 "expectedMd5": expected_md5,
                 "expectedSha256": expected_sha256,
-            }
+            },
         )
+        if "name" not in data or "displayName" not in data:
+            raise WorkBuddyConfigError("experts.create requires name and display_name")
         files, closer = open_package_file(package)
         try:
             if files is None:
                 multipart_files = {k: (None, str(v)) for k, v in data.items()}
-                if not multipart_files:
-                    multipart_files = {"_": (None, "")}
                 resp = self._post_multipart("/openapi/experts", files=multipart_files)
             else:
                 resp = self._post_multipart("/openapi/experts", data=data, files=files)
@@ -85,7 +87,7 @@ class ExpertsResource(Resource):
         return self._as_map(resp)
 
     def get(self, expert_ref: str) -> ApiResponse[dict[str, Any]]:
-        return self._as_map(self._get(f"/openapi/experts/{expert_ref}"))
+        return self._as_map(self._get(f"/openapi/experts/{self._segment(expert_ref)}"))
 
     def update(
         self,
@@ -127,18 +129,18 @@ class ExpertsResource(Resource):
                 "agentName": agent_name,
                 "expectedMd5": expected_md5,
                 "expectedSha256": expected_sha256,
-            }
+            },
         )
         files, closer = open_package_file(package)
         try:
             if files is None:
                 multipart_files = {k: (None, str(v)) for k, v in data.items()}
                 if not multipart_files:
-                    multipart_files = {"_": (None, "")}
-                resp = self._post_multipart(f"/openapi/experts/{expert_ref}/update", files=multipart_files)
+                    raise WorkBuddyConfigError("experts.update requires package or at least one update field")
+                resp = self._post_multipart(f"/openapi/experts/{self._segment(expert_ref)}/update", files=multipart_files)
             else:
                 resp = self._post_multipart(
-                    f"/openapi/experts/{expert_ref}/update", data=data, files=files
+                    f"/openapi/experts/{self._segment(expert_ref)}/update", data=data, files=files,
                 )
         finally:
             if closer is not None:
@@ -146,7 +148,7 @@ class ExpertsResource(Resource):
         return self._as_map(resp)
 
     def delete(self, expert_ref: str) -> ApiResponse[dict[str, Any]]:
-        return self._as_map(self._post_json(f"/openapi/experts/{expert_ref}/delete", body=None, send_json=False))
+        return self._as_map(self._post_json(f"/openapi/experts/{self._segment(expert_ref)}/delete", body=None, send_json=False))
 
     def set_enabled(
         self,
@@ -160,7 +162,7 @@ class ExpertsResource(Resource):
         if disabled_reason is not None:
             body["disabledReason"] = disabled_reason
         resp = self._post_json(
-            f"/openapi/experts/{expert_ref}/toggle",
+            f"/openapi/experts/{self._segment(expert_ref)}/toggle",
             params={"source": dump_value(source)},
             body=body,
         )
@@ -172,7 +174,7 @@ class ExpertsResource(Resource):
         *,
         source: SkillSource | str,
         type: VisibilityType | str,
-        scopes: list[VisibilityScope | Mapping[str, Any]] | None = None,
+        scopes: Sequence[VisibilityScope | Mapping[str, Any]] | None = None,
     ) -> ApiResponse[None]:
         scope_objs: list[VisibilityScope] = []
         for s in scopes or []:
@@ -182,7 +184,7 @@ class ExpertsResource(Resource):
                 scope_objs.append(VisibilityScope.from_mapping(s))
         spec = VisibilitySpec(type=dump_value(type), scopes=scope_objs)
         resp = self._post_json(
-            f"/openapi/experts/{expert_ref}/visibility",
+            f"/openapi/experts/{self._segment(expert_ref)}/visibility",
             params={"source": dump_value(source)},
             body=spec.to_wire(),
         )
@@ -195,7 +197,7 @@ class ExpertsResource(Resource):
         source: SkillSource | str,
     ) -> ApiResponse[VisibilitySpec]:
         resp = self._get(
-            f"/openapi/experts/{expert_ref}/visibility",
+            f"/openapi/experts/{self._segment(expert_ref)}/visibility",
             params={"source": dump_value(source)},
         )
         return ApiResponse(

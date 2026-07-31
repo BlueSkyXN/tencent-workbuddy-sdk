@@ -7,13 +7,13 @@ from typing import Any
 
 import httpx
 
+from workbuddy_enterprise._transport import Transport
 from workbuddy_enterprise.auth import (
     DEFAULT_BASE_URL,
     DEFAULT_TOKEN_URL,
     AuthConfig,
     auth_config_from_env,
 )
-from workbuddy_enterprise._transport import Transport
 from workbuddy_enterprise.resources.analytics import AnalyticsResource
 from workbuddy_enterprise.resources.enterprise import EnterpriseResource
 from workbuddy_enterprise.resources.expert_categories import ExpertCategoriesResource
@@ -80,7 +80,7 @@ class WorkBuddyClient:
         base_url: str = DEFAULT_BASE_URL,
         token_url: str = DEFAULT_TOKEN_URL,
         **kwargs: Any,
-    ) -> "WorkBuddyClient":
+    ) -> WorkBuddyClient:
         cfg = AuthConfig(
             enterprise_id=enterprise_id,
             client_id=client_id,
@@ -98,7 +98,7 @@ class WorkBuddyClient:
         enterprise_id: str,
         base_url: str = DEFAULT_BASE_URL,
         **kwargs: Any,
-    ) -> "WorkBuddyClient":
+    ) -> WorkBuddyClient:
         cfg = AuthConfig(
             enterprise_id=enterprise_id,
             api_key=api_key,
@@ -107,7 +107,7 @@ class WorkBuddyClient:
         return cls(cfg, **kwargs)
 
     @classmethod
-    def from_env(cls, **overrides: Any) -> "WorkBuddyClient":
+    def from_env(cls, **overrides: Any) -> WorkBuddyClient:
         timeout = overrides.pop("timeout", 30.0)
         transport = overrides.pop("transport", None)
         http_client = overrides.pop("http_client", None)
@@ -124,7 +124,7 @@ class WorkBuddyClient:
     def close(self) -> None:
         self._transport.close()
 
-    def __enter__(self) -> "WorkBuddyClient":
+    def __enter__(self) -> WorkBuddyClient:  # noqa: PYI034 - Python 3.10 has no typing.Self
         return self
 
     def __exit__(self, *exc: object) -> None:

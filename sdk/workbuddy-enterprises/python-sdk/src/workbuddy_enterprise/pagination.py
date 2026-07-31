@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
-from typing import Any, Mapping
+from collections.abc import Mapping
+from typing import Any
 
-from workbuddy_enterprise.response import Page
 from workbuddy_enterprise._serialization import as_mapping
+from workbuddy_enterprise.response import Page
 
 
 def parse_page(data: Any, *, item_keys: tuple[str, ...] | None = None) -> Page[dict[str, Any]]:

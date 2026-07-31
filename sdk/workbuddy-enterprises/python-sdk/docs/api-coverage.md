@@ -1,7 +1,10 @@
 # API coverage matrix
 
-> **注意（2026-07-28）：** `contract_tested` 表示存在 Python mock 合同测试，且样例已按 YAML 关键字段校正。
-> 这**不等于**全部 73 个 operation 已在真实企业环境 live 验证。
+> **注意（2026-07-28）：** `contract_tested` 表示 Python mock 请求已由当前 YAML 校验
+> operation、method/path、全部 query、JSON/multipart 顶层字段、request content type、
+> primitive wire type、enum、嵌套 required/声明字段和无 body POST。
+> 它不覆盖完整 response schema、`format`、数值/数组边界或跨字段业务约束，也**不等于**
+> 真实企业 live 验证。
 
 Status keys:
 
@@ -88,4 +91,5 @@ Total operations: **73**
 | analytics | POST | `/enterprises/{enterpriseId}/dashboard/analytics/generation` | `analytics.generation` | yes | yes | no | no |
 | analytics | POST | `/enterprises/{enterpriseId}/dashboard/member/data` | `analytics.member_data` | yes | yes | no | no |
 
-Note: `contract_tested=yes` for all 73 does **not** mean live enterprise verification.
+Note: `contract_tested=yes` for all 73 means YAML request-field serialization coverage,
+not full JSON Schema, response-schema, or live enterprise verification.

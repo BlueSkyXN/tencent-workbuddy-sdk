@@ -31,6 +31,7 @@ tencent-workbuddy-sdk/
       rust-sdk/                      # Rust 实现 + CLI
         Cargo.toml
         src/lib.rs
+        src/operations.rs            # 73-operation request/CLI registry
         src/bin/workbuddy.rs
         CI_ONLY_BUILD.md
 ```
@@ -73,8 +74,12 @@ tencent-workbuddy-sdk/
 - `auth`：OAuth client_credentials / API Key  
 - `client`：统一 HTTP、错误、requestId  
 - `resources/*`：enterprise / users / members / licenses / usage / groups / models / skills / categories / experts / analytics  
-- Python 另有 `schemas` 与 contract tests  
-- Rust 另有 `bin/workbuddy` CLI  
+- Python 另有 `schemas`、73-operation mock contract tests，以及对 Rust registry 的 YAML parity gate
+- Rust 另有 `operations` request metadata、typed/CLI loopback request tests 与 `bin/workbuddy` CLI
+
+Rust CLI 保留常用的 typed convenience subcommands；其余 operation 通过
+`workbuddy api <operation>` 进入同一 `OperationSpec` registry。Generic 入口的 JSON body 只从
+文件/stdin 读取，multipart package 作为文件上传，mutation 统一经过 `--yes` gate。
 
 ## 非目标架构
 

@@ -7,6 +7,7 @@
 pub mod auth;
 pub mod client;
 pub mod error;
+pub mod operations;
 pub mod resources;
 pub mod response;
 pub mod types;
@@ -14,8 +15,12 @@ pub mod types;
 pub use auth::{
     extract_enterprise_ids_from_token, ClientConfig, DEFAULT_BASE_URL, DEFAULT_TOKEN_URL,
 };
-pub use client::Client;
+pub use client::{encode_path_segment, Client};
 pub use error::{Error, Result};
+pub use operations::{
+    find_operation, operation_names, validate_json_operation, OperationBodyKind, OperationSpec,
+    OPENAPI_OPERATIONS, OPERATION_SPECS,
+};
 pub use response::{ApiResponse, Page};
 pub use types::{PublishStatus, SkillSource, VisibilityType};
 

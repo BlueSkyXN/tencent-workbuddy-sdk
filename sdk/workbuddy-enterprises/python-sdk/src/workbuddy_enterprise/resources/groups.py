@@ -1,12 +1,13 @@
 
 from __future__ import annotations
 
-from typing import Any, Sequence
+from collections.abc import Sequence
+from typing import Any
 
+from workbuddy_enterprise._serialization import clean_dict
 from workbuddy_enterprise.pagination import page_query
 from workbuddy_enterprise.resources._base import Resource
 from workbuddy_enterprise.response import ApiResponse, Page
-from workbuddy_enterprise._serialization import clean_dict
 
 
 class GroupsResource(Resource):
@@ -21,7 +22,7 @@ class GroupsResource(Resource):
         return self._as_page(self._get("/openapi/groups", params=params))
 
     def get(self, group_id: str) -> ApiResponse[dict[str, Any]]:
-        return self._as_map(self._get(f"/openapi/groups/{group_id}"))
+        return self._as_map(self._get(f"/openapi/groups/{self._segment(group_id)}"))
 
     def list_members(
         self,
@@ -32,7 +33,7 @@ class GroupsResource(Resource):
         keyword: str | None = None,
     ) -> ApiResponse[Page[dict[str, Any]]]:
         params = {"keyword": keyword, **page_query(page=page, page_size=page_size)}
-        return self._as_page(self._get(f"/openapi/groups/{group_id}/members", params=params))
+        return self._as_page(self._get(f"/openapi/groups/{self._segment(group_id)}/members", params=params))
 
     def add_members(
         self,
@@ -45,9 +46,9 @@ class GroupsResource(Resource):
             {
                 "userIds": list(user_ids) if user_ids is not None else None,
                 "orgNodeIds": list(org_node_ids) if org_node_ids is not None else None,
-            }
+            },
         )
-        return self._as_map(self._post_json(f"/openapi/groups/{group_id}/members/add", body=body))
+        return self._as_map(self._post_json(f"/openapi/groups/{self._segment(group_id)}/members/add", body=body))
 
     def remove_members(
         self,
@@ -60,9 +61,9 @@ class GroupsResource(Resource):
             {
                 "userIds": list(user_ids) if user_ids is not None else None,
                 "orgNodeIds": list(org_node_ids) if org_node_ids is not None else None,
-            }
+            },
         )
-        return self._as_map(self._post_json(f"/openapi/groups/{group_id}/members/remove", body=body))
+        return self._as_map(self._post_json(f"/openapi/groups/{self._segment(group_id)}/members/remove", body=body))
 
     def replace_members(
         self,
@@ -77,6 +78,6 @@ class GroupsResource(Resource):
                 "userIds": list(user_ids) if user_ids is not None else None,
                 "userNames": list(user_names) if user_names is not None else None,
                 "clearAll": clear_all,
-            }
+            },
         )
-        return self._as_map(self._post_json(f"/openapi/groups/{group_id}/members/replace", body=body))
+        return self._as_map(self._post_json(f"/openapi/groups/{self._segment(group_id)}/members/replace", body=body))

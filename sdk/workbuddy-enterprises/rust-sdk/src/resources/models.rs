@@ -1,5 +1,6 @@
-use crate::client::{push_q, push_qb, push_qi, Client};
-use crate::error::Result;
+use crate::client::{encode_path_segment, push_q, push_qb, push_qi, Client};
+use crate::error::{Error, Result};
+use crate::operations::validate_json_operation;
 use crate::response::ApiResponse;
 use serde_json::{json, Value};
 
@@ -13,6 +14,7 @@ impl ModelsResource<'_> {
     }
 
     pub fn set_builtin_enabled(&self, model_id: &str, enabled: bool) -> Result<ApiResponse<Value>> {
+        let model_id = encode_path_segment(model_id);
         self.client.post_json(
             &format!("/openapi/models/builtin/{model_id}/toggle"),
             &[],
@@ -27,6 +29,7 @@ impl ModelsResource<'_> {
         user_ids: Option<&[&str]>,
         group_ids: Option<&[&str]>,
     ) -> Result<ApiResponse<Value>> {
+        let model_id = encode_path_segment(model_id);
         self.set_model_visibility(
             &format!("/openapi/models/builtin/{model_id}/visibility"),
             scope,
@@ -47,15 +50,18 @@ impl ModelsResource<'_> {
     }
 
     pub fn create_custom(&self, body: Value) -> Result<ApiResponse<Value>> {
+        validate_json_operation("models-custom-create", &body)?;
         self.client.post_json("/openapi/models/custom", &[], body)
     }
 
     pub fn get_custom(&self, model_id: &str) -> Result<ApiResponse<Value>> {
+        let model_id = encode_path_segment(model_id);
         self.client
             .get_json(&format!("/openapi/models/custom/{model_id}"), &[])
     }
 
     pub fn delete_custom(&self, model_id: &str) -> Result<ApiResponse<Value>> {
+        let model_id = encode_path_segment(model_id);
         // no requestBody in YAML
         self.client
             .post_empty(&format!("/openapi/models/custom/{model_id}/delete"), &[])
@@ -68,6 +74,7 @@ impl ModelsResource<'_> {
         user_ids: Option<&[&str]>,
         group_ids: Option<&[&str]>,
     ) -> Result<ApiResponse<Value>> {
+        let model_id = encode_path_segment(model_id);
         self.set_model_visibility(
             &format!("/openapi/models/custom/{model_id}/visibility"),
             scope,
@@ -99,11 +106,13 @@ impl ModelsResource<'_> {
     }
 
     pub fn get(&self, model_id: &str) -> Result<ApiResponse<Value>> {
+        let model_id = encode_path_segment(model_id);
         self.client
             .get_json(&format!("/openapi/models/{model_id}"), &[])
     }
 
     pub fn set_enabled(&self, model_id: &str, enabled: bool) -> Result<ApiResponse<Value>> {
+        let model_id = encode_path_segment(model_id);
         self.client.post_json(
             &format!("/openapi/models/{model_id}/toggle"),
             &[],
@@ -118,6 +127,7 @@ impl ModelsResource<'_> {
         user_ids: Option<&[&str]>,
         group_ids: Option<&[&str]>,
     ) -> Result<ApiResponse<Value>> {
+        let model_id = encode_path_segment(model_id);
         self.set_model_visibility(
             &format!("/openapi/models/{model_id}/visibility"),
             scope,
@@ -133,6 +143,11 @@ impl ModelsResource<'_> {
         user_ids: Option<&[&str]>,
         group_ids: Option<&[&str]>,
     ) -> Result<ApiResponse<Value>> {
+        if !matches!(scope, "all" | "specified") {
+            return Err(Error::Config(
+                "model visibility scope must be `all` or `specified`".into(),
+            ));
+        }
         let mut body = serde_json::Map::new();
         body.insert("scope".into(), json!(scope));
         if let Some(v) = user_ids {

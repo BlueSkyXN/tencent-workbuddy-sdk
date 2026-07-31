@@ -26,12 +26,19 @@ impl ClientConfig {
                 "enterprise_id is required (WORKBUDDY_ENTERPRISE_ID)".into(),
             ));
         }
-        let has_oauth = self.client_id.as_ref().is_some_and(|s| !s.is_empty())
-            && self.client_secret.as_ref().is_some_and(|s| !s.is_empty());
+        let has_client_id = self.client_id.as_ref().is_some_and(|s| !s.is_empty());
+        let has_client_secret = self.client_secret.as_ref().is_some_and(|s| !s.is_empty());
+        let has_oauth = has_client_id && has_client_secret;
+        let has_oauth_fields = self.client_id.is_some() || self.client_secret.is_some();
         let has_key = self.api_key.as_ref().is_some_and(|s| !s.is_empty());
-        if has_oauth && has_key {
+        if has_oauth_fields && has_key {
             return Err(Error::Config(
                 "provide either OAuth client credentials or api_key, not both".into(),
+            ));
+        }
+        if has_oauth_fields && !has_oauth {
+            return Err(Error::Config(
+                "OAuth requires both client_id and client_secret".into(),
             ));
         }
         if !has_oauth && !has_key {
@@ -46,12 +53,10 @@ impl ClientConfig {
         use std::env;
         let mut cfg = Self {
             enterprise_id: env::var("WORKBUDDY_ENTERPRISE_ID").unwrap_or_default(),
-            client_id: env::var("WORKBUDDY_CLIENT_ID")
-                .ok()
-                .filter(|s| !s.is_empty()),
-            client_secret: env::var("WORKBUDDY_CLIENT_SECRET")
-                .ok()
-                .filter(|s| !s.is_empty()),
+            // Preserve presence, including an empty value, so validate() can reject
+            // partial/mixed OAuth configuration instead of treating it as unset.
+            client_id: env::var("WORKBUDDY_CLIENT_ID").ok(),
+            client_secret: env::var("WORKBUDDY_CLIENT_SECRET").ok(),
             api_key: env::var("WORKBUDDY_API_KEY").ok().filter(|s| !s.is_empty()),
             base_url: env::var("WORKBUDDY_BASE_URL").unwrap_or_else(|_| DEFAULT_BASE_URL.into()),
             token_url: env::var("WORKBUDDY_TOKEN_URL").unwrap_or_else(|_| DEFAULT_TOKEN_URL.into()),
@@ -178,18 +183,41 @@ pub fn extract_enterprise_ids_from_token(token: &str) -> Vec<String> {
 mod tests {
     use super::*;
 
-    #[test]
-    fn rejects_both_auth_modes() {
-        let cfg = ClientConfig {
+    fn config(
+        client_id: Option<&str>,
+        client_secret: Option<&str>,
+        api_key: Option<&str>,
+    ) -> ClientConfig {
+        ClientConfig {
             enterprise_id: "e".into(),
-            client_id: Some("c".into()),
-            client_secret: Some("s".into()),
-            api_key: Some("pt_x".into()),
+            client_id: client_id.map(str::to_string),
+            client_secret: client_secret.map(str::to_string),
+            api_key: api_key.map(str::to_string),
             base_url: DEFAULT_BASE_URL.into(),
             token_url: DEFAULT_TOKEN_URL.into(),
             timeout: Duration::from_secs(5),
-        };
-        assert!(cfg.validate().is_err());
+        }
+    }
+
+    #[test]
+    fn rejects_both_auth_modes() {
+        assert!(config(Some("c"), Some("s"), Some("pt_x"))
+            .validate()
+            .is_err());
+    }
+
+    #[test]
+    fn rejects_partial_oauth_credentials() {
+        assert!(config(Some("c"), None, None).validate().is_err());
+        assert!(config(None, Some("s"), None).validate().is_err());
+    }
+
+    #[test]
+    fn rejects_api_key_with_any_oauth_credential() {
+        assert!(config(Some("c"), None, Some("pt_x")).validate().is_err());
+        assert!(config(None, Some("s"), Some("pt_x")).validate().is_err());
+        assert!(config(Some(""), None, Some("pt_x")).validate().is_err());
+        assert!(config(None, Some(""), Some("pt_x")).validate().is_err());
     }
 
     #[test]

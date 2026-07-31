@@ -4,11 +4,13 @@
 from __future__ import annotations
 
 import base64
+import binascii
 import json
 import os
 import time
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, Mapping
+from typing import Any
 
 import httpx
 
@@ -37,20 +39,23 @@ class AuthConfig:
     def validate(self) -> None:
         if not self.enterprise_id:
             raise WorkBuddyConfigError(
-                f"enterprise_id is required (set {ENV_ENTERPRISE_ID} or pass enterprise_id=...)"
+                f"enterprise_id is required (set {ENV_ENTERPRISE_ID} or pass enterprise_id=...)",
             )
-        has_oauth = bool(self.client_id and self.client_secret)
+        has_client_id = bool(self.client_id)
+        has_client_secret = bool(self.client_secret)
+        has_oauth = has_client_id and has_client_secret
+        has_oauth_fields = self.client_id is not None or self.client_secret is not None
         has_key = bool(self.api_key)
-        if has_oauth and has_key:
+        if has_key and has_oauth_fields:
             raise WorkBuddyConfigError(
-                "Provide either OAuth client credentials or api_key, not both"
+                "Provide either OAuth client credentials or api_key, not both",
             )
+        if has_oauth_fields and not has_oauth:
+            raise WorkBuddyConfigError("OAuth requires both client_id and client_secret")
         if not has_oauth and not has_key:
             raise WorkBuddyConfigError(
-                "Provide OAuth client_id/client_secret or enterprise api_key (pt_...)"
+                "Provide OAuth client_id/client_secret or enterprise api_key (pt_...)",
             )
-        if has_oauth and (not self.client_id or not self.client_secret):
-            raise WorkBuddyConfigError("OAuth requires both client_id and client_secret")
 
 
 def auth_config_from_env(
@@ -74,11 +79,8 @@ def auth_config_from_env(
         base_url=(base_url or env.get(ENV_BASE_URL) or DEFAULT_BASE_URL).rstrip("/"),
         token_url=(token_url or env.get(ENV_TOKEN_URL) or DEFAULT_TOKEN_URL),
     )
-    # normalize empty strings to None for optional secrets
-    if cfg.client_id == "":
-        cfg.client_id = None
-    if cfg.client_secret == "":
-        cfg.client_secret = None
+    # Preserve OAuth field presence, including empty values, so validate() rejects
+    # partial/mixed configuration instead of treating it as unset.
     if cfg.api_key == "":
         cfg.api_key = None
     cfg.validate()
@@ -87,7 +89,10 @@ def auth_config_from_env(
 
 def b64url_json(segment: str) -> dict[str, Any]:
     pad = "=" * ((4 - len(segment) % 4) % 4)
-    return json.loads(base64.urlsafe_b64decode(segment + pad).decode("utf-8"))
+    value = json.loads(base64.urlsafe_b64decode(segment + pad).decode("utf-8"))
+    if not isinstance(value, Mapping):
+        raise ValueError("JWT payload must be a JSON object")
+    return dict(value)
 
 
 def decode_jwt_payload(token: str) -> dict[str, Any] | None:
@@ -96,18 +101,18 @@ def decode_jwt_payload(token: str) -> dict[str, Any] | None:
         return None
     try:
         return b64url_json(parts[1])
-    except Exception:
+    except (ValueError, binascii.Error):
         return None
 
 
 def extract_enterprise_ids_from_token(token: str) -> list[str]:
     """Opt-in helper: parse ent-member:{id} roles from a JWT access token."""
     payload = decode_jwt_payload(token) or {}
-    roles = (
-        (payload.get("realm_access") or {}).get("roles")
-        or payload.get("roles")
-        or []
-    )
+    realm_access = payload.get("realm_access")
+    realm_roles = realm_access.get("roles") if isinstance(realm_access, Mapping) else None
+    roles = realm_roles or payload.get("roles") or []
+    if not isinstance(roles, list):
+        return []
     ids: list[str] = []
     for role in roles:
         if isinstance(role, str) and role.startswith("ent-member:"):
@@ -163,7 +168,7 @@ class TokenProvider:
 
         try:
             body = resp.json()
-        except Exception:
+        except ValueError:
             body = {"raw": resp.text[:200]}
 
         if resp.status_code >= 400 or not isinstance(body, dict) or not body.get("access_token"):

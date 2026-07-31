@@ -4,7 +4,7 @@
 
 | 文件 | 名称 | 作用 |
 |---|---|---|
-| `.github/workflows/ci.yml` | `ci` | Python：pytest + build wheel/sdist，上传 `dist` artifact |
+| `.github/workflows/ci.yml` | `ci` | 下载官方 OpenAPI，对照 Python + Rust registry，pytest、Ruff、Mypy，build wheel/sdist，上传 `dist` artifact |
 | `.github/workflows/rust-sdk.yml` | `rust-sdk` | Rust：fmt / clippy / test / release，上传 `workbuddy` CLI artifact |
 
 触发：
@@ -58,8 +58,8 @@ gh run download <run-id> --repo BlueSkyXN/tencent-workbuddy-sdk -n workbuddy-cli
 
 | CI 绿 | 含义 |
 |---|---|
-| Python contract/unit 绿 | mock 合同与基础单元通过 |
-| Rust fmt/clippy/test/release 绿 | 代码可编译、基础测试过、CLI 可打包 |
+| Python contract/unit/static 绿 | 当前官方 YAML 的 73-operation、全部请求字段、Rust registry parity、Ruff 与 Mypy gate 通过 |
+| Rust fmt/clippy/test/release 绿 | 代码可编译、typed/CLI loopback 与 manifest tests 通过、CLI 可打包 |
 | 不自动证明 | 全部 73 个 operation 已在真实企业环境 live 验证（含写接口） |
 
-live 只读/写操作仍需显式凭据与授权。
+YAML 门禁不等于完整 JSON Schema 或 response schema 验证；live 只读/写操作仍需显式凭据与授权。

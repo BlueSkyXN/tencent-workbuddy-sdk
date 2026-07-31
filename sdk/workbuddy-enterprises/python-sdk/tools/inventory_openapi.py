@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python3
 """Inventory OpenAPI paths/operations for coverage checks."""
 
@@ -9,7 +8,6 @@ import hashlib
 import re
 from collections import defaultdict
 from pathlib import Path
-
 
 PATH_RE = re.compile(r"^  '?(?P<path>/[^:'\s]+)'?:\s*$")
 METHOD_RE = re.compile(r"^    (get|post|put|delete|patch):\s*$")

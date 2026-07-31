@@ -1,5 +1,6 @@
-use crate::client::{push_q, push_qb, push_qi, Client};
+use crate::client::{encode_path_segment, push_q, push_qb, push_qi, Client};
 use crate::error::Result;
+use crate::operations::validate_json_operation;
 use crate::response::{parse_page_with_keys, ApiResponse, Page};
 use serde_json::{json, Value};
 
@@ -43,16 +44,20 @@ impl UsersResource<'_> {
     }
 
     pub fn update(&self, user_id: &str, body: Value) -> Result<ApiResponse<Value>> {
+        validate_json_operation("users-update", &body)?;
+        let user_id = encode_path_segment(user_id);
         self.client
             .post_json(&format!("/users/{user_id}/update"), &[], body)
     }
 
     pub fn delete(&self, user_id: &str) -> Result<ApiResponse<Value>> {
+        let user_id = encode_path_segment(user_id);
         self.client
             .post_empty(&format!("/users/{user_id}/delete"), &[])
     }
 
     pub fn update_password(&self, user_id: &str, password: &str) -> Result<ApiResponse<Value>> {
+        let user_id = encode_path_segment(user_id);
         self.client.post_json(
             &format!("/users/{user_id}/password/update"),
             &[],

@@ -5,7 +5,8 @@
 1. OAuth2 `client_credentials` (`WORKBUDDY_CLIENT_ID` + `WORKBUDDY_CLIENT_SECRET`)
 2. Enterprise application API key (`WORKBUDDY_API_KEY`, typically `pt_...`)
 
-If both are provided, the SDK raises `WorkBuddyConfigError`.
+`client_id` and `client_secret` must be provided as a complete pair. The SDK raises
+`WorkBuddyConfigError` for a partial OAuth pair or when any OAuth credential is mixed with an API key.
 
 ## Required enterprise id
 

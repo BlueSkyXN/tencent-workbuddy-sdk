@@ -71,9 +71,18 @@ export WORKBUDDY_CLIENT_SECRET=...
 ./workbuddy skills list --source custom
 ./workbuddy models list
 ./workbuddy members list --page-num 1 --page-size 20
+
+# 列出完整 73-operation registry
+./workbuddy operations
+
+# generic read
+./workbuddy api models-available --query userId=u1
 ```
 
-写操作命令存在，但需要显式 `--yes`；对真实企业务必谨慎。
+常用 convenience subcommands 是易用入口；完整 YAML surface 使用
+`workbuddy api <operation>`。JSON body 使用 `--body-file <path|->`，multipart 使用
+`--field` / `--fields-file <path|->` 与 `--package`。Mutation 需要显式 `--yes`；对真实企业
+写操作务必谨慎。
 
 详情：[`../sdk/workbuddy-enterprises/rust-sdk/README.md`](../sdk/workbuddy-enterprises/rust-sdk/README.md)
 

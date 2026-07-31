@@ -1,11 +1,12 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import Any, Mapping
+from typing import Any
 
+from workbuddy_enterprise._serialization import as_mapping
 from workbuddy_enterprise.types import ScopeType, VisibilityType
-from workbuddy_enterprise._serialization import as_mapping, dump_value
 
 
 @dataclass(slots=True)
@@ -15,7 +16,7 @@ class VisibilityScope:
     scope_name: str | None = None
 
     @classmethod
-    def from_mapping(cls, data: Mapping[str, Any]) -> "VisibilityScope":
+    def from_mapping(cls, data: Mapping[str, Any]) -> VisibilityScope:
         m = as_mapping(data)
         return cls(
             scope_type=str(m.get("scopeType") or m.get("scope_type") or ""),
@@ -39,7 +40,7 @@ class VisibilitySpec:
     scopes: list[VisibilityScope] = field(default_factory=list)
 
     @classmethod
-    def from_mapping(cls, data: Mapping[str, Any]) -> "VisibilitySpec":
+    def from_mapping(cls, data: Mapping[str, Any]) -> VisibilitySpec:
         m = as_mapping(data)
         scopes_raw = m.get("scopes") or []
         scopes = [VisibilityScope.from_mapping(x) for x in scopes_raw] if isinstance(scopes_raw, list) else []

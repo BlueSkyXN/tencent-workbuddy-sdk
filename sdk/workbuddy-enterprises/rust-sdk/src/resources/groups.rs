@@ -1,4 +1,4 @@
-use crate::client::{push_q, push_qi, Client};
+use crate::client::{encode_path_segment, push_q, push_qi, Client};
 use crate::error::Result;
 use crate::response::ApiResponse;
 use serde_json::{json, Value};
@@ -22,6 +22,7 @@ impl GroupsResource<'_> {
     }
 
     pub fn get(&self, group_id: &str) -> Result<ApiResponse<Value>> {
+        let group_id = encode_path_segment(group_id);
         self.client
             .get_json(&format!("/openapi/groups/{group_id}"), &[])
     }
@@ -33,6 +34,7 @@ impl GroupsResource<'_> {
         page_size: Option<i64>,
         keyword: Option<&str>,
     ) -> Result<ApiResponse<crate::response::Page<Value>>> {
+        let group_id = encode_path_segment(group_id);
         let mut q = Vec::new();
         push_qi(&mut q, "page", page);
         push_qi(&mut q, "pageSize", page_size);
@@ -47,6 +49,7 @@ impl GroupsResource<'_> {
         user_ids: Option<&[&str]>,
         org_node_ids: Option<&[&str]>,
     ) -> Result<ApiResponse<Value>> {
+        let group_id = encode_path_segment(group_id);
         let mut body = serde_json::Map::new();
         if let Some(v) = user_ids {
             body.insert("userIds".into(), json!(v));
@@ -67,6 +70,7 @@ impl GroupsResource<'_> {
         user_ids: Option<&[&str]>,
         org_node_ids: Option<&[&str]>,
     ) -> Result<ApiResponse<Value>> {
+        let group_id = encode_path_segment(group_id);
         let mut body = serde_json::Map::new();
         if let Some(v) = user_ids {
             body.insert("userIds".into(), json!(v));
@@ -88,6 +92,7 @@ impl GroupsResource<'_> {
         user_names: Option<&[&str]>,
         clear_all: Option<bool>,
     ) -> Result<ApiResponse<Value>> {
+        let group_id = encode_path_segment(group_id);
         let mut body = serde_json::Map::new();
         if let Some(v) = user_ids {
             body.insert("userIds".into(), json!(v));

@@ -57,7 +57,7 @@ curl -fsSL -o local/codebuddy-openapi-api.yaml \
 | 用途 | 离线阅读、`tools/inventory_openapi.py` 覆盖盘点 |
 | 文档应记录 | 官方 URL + 抓取时间 + 文件 SHA-256 + paths/ops 数量 |
 
-### 实现期使用过的快照元数据（2026-07-27）
+### 实现期使用过的快照元数据（2026-07-27，2026-07-28 再核对）
 
 > 仅作历史锚定；上游更新后以线上 `api.yaml` 为准，并应重算 hash。
 
@@ -65,6 +65,7 @@ curl -fsSL -o local/codebuddy-openapi-api.yaml \
 |---|---|
 | Source URL | https://www.codebuddy.cn/apiDocs/api.yaml |
 | Captured | 2026-07-27（Asia/Shanghai） |
+| Re-verified | 2026-07-28（线上与本地逐字节一致） |
 | Local path | `local/codebuddy-openapi-api.yaml`（不提交） |
 | Size | 238,561 bytes / 5,597 lines |
 | SHA-256 | `e6c6e6f8c350a4219a45f1b6d488d4b38d29c3e2a872d4b1b31c46774b0638fe` |
@@ -82,6 +83,33 @@ shasum -a 256 local/codebuddy-openapi-api.yaml
 cd sdk/workbuddy-enterprises/python-sdk
 python tools/inventory_openapi.py ../../../local/codebuddy-openapi-api.yaml
 ```
+
+## 契约测试使用方式
+
+Python contract tests 按以下顺序定位规范：
+
+1. 环境变量 `WORKBUDDY_OPENAPI_SPEC` 指向的文件
+2. 仓库根 `local/codebuddy-openapi-api.yaml`
+
+未找到规范时，基础 mock method/path/body smoke 仍会运行，YAML 专项断言会明确标记为
+skip；CI 始终提供官方规范，因此不会以降级模式通过门禁。
+
+GitHub Actions 会在 runner 临时目录下载上述官方 URL，并通过
+`WORKBUDDY_OPENAPI_SPEC` 交给测试；规范不会因此写入 Git 或发布产物。
+
+当前自动化校验覆盖：
+
+- 官方 YAML 的 73-operation exact set、HTTP method/path 与 path 参数；
+- 全部 query 字段及 required query；
+- JSON/multipart request media type、全部顶层 body properties 与 required fields；
+- Python mock 的 primitive wire type、enum、嵌套 required/声明字段、multipart package 与
+  无 request body 的 POST；
+- Rust `OperationSpec` registry 的 method/path、path/query、body kind、allowed/required body
+  metadata；Rust manifest/helper tests 另行检查 registry 自洽、write 分类、required query、
+  path rendering 与三类 body transport metadata。
+
+它不是完整的 OpenAPI Schema validator：仍不覆盖所有 `format`、`minimum` / `maximum`、
+`minItems` / `maxItems`、跨字段业务条件或完整 response schema，也不替代真实企业 live 验证。
 
 ## 规范与本仓库 SDK 的关系
 

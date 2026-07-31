@@ -3,8 +3,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable, Mapping
+from dataclasses import fields, is_dataclass
 from enum import Enum
-from typing import Any, Mapping
+from typing import Any
 
 
 def to_camel(name: str) -> str:
@@ -39,7 +41,12 @@ def dump_value(value: Any) -> Any:
 
 def dump_model(obj: Any, *, by_alias: bool = True) -> dict[str, Any]:
     data: dict[str, Any] = {}
-    for key, value in getattr(obj, "__dict__", {}).items():
+    values: Iterable[tuple[str, Any]]
+    if is_dataclass(obj) and not isinstance(obj, type):
+        values = ((field.name, getattr(obj, field.name)) for field in fields(obj))
+    else:
+        values = getattr(obj, "__dict__", {}).items()
+    for key, value in values:
         if key.startswith("_"):
             continue
         if value is None:

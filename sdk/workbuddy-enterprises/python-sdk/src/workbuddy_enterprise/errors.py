@@ -35,7 +35,7 @@ class WorkBuddyAuthError(WorkBuddyError):
 
 
 class WorkBuddyHTTPError(WorkBuddyError):
-    """Non-2xx HTTP response."""
+    """Non-2xx response or non-timeout HTTP transport failure."""
 
     def __init__(
         self,

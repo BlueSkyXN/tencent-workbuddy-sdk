@@ -25,9 +25,10 @@
 
 规则：
 
-1. **OAuth 与 API Key 不能同时提供**  
-2. `enterprise_id` 不靠“猜”；JWT 解析 `ent-member:{id}` 只是辅助，不是默认配置路径  
-3. 专享版/私有化请改 `BASE_URL` / `TOKEN_URL`
+1. `client_id` 与 `client_secret` 必须成对提供；任一 OAuth 残项（包括已设置但为空）与 API Key 同时存在也会被拒绝
+2. **OAuth 与 API Key 不能同时提供**
+3. `enterprise_id` 不靠“猜”；JWT 解析 `ent-member:{id}` 只是辅助，不是默认配置路径
+4. 专享版/私有化请改 `BASE_URL` / `TOKEN_URL`
 
 ## 调用头
 

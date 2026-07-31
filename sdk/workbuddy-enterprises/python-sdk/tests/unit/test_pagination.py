@@ -16,7 +16,7 @@ def test_parse_page_fields():
             "pageNum": 1,
             "pageSize": 20,
             "nextPageToken": "n1",
-        }
+        },
     )
     assert page.items[0]["id"] == 1
     assert page.total_count == 1
@@ -35,7 +35,7 @@ def test_parse_page_members_key_and_nested_pagination():
         {
             "members": [{"id": "m1"}],
             "pagination": {"totalCount": 9, "pageNum": 2, "pageSize": 10},
-        }
+        },
     )
     assert page.items[0]["id"] == "m1"
     assert page.total_count == 9

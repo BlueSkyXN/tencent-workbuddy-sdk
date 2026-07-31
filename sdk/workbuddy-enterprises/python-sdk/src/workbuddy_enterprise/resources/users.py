@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from typing import Any
 
+from workbuddy_enterprise._serialization import clean_dict
 from workbuddy_enterprise.pagination import page_query, parse_page
 from workbuddy_enterprise.resources._base import Resource
 from workbuddy_enterprise.response import ApiResponse, Page
-from workbuddy_enterprise._serialization import clean_dict
 
 
 class UsersResource(Resource):
@@ -39,9 +39,12 @@ class UsersResource(Resource):
             or "list" in resp.data
             or "totalCount" in resp.data
         ):
-            page_obj = parse_page(resp.data, item_keys=("users", "items", "list", "records"))
-            return ApiResponse(page_obj, resp.code, resp.message, resp.request_id, resp.raw)
-        return self._as_map(resp)
+            data: Page[dict[str, Any]] | dict[str, Any] = parse_page(
+                resp.data, item_keys=("users", "items", "list", "records"),
+            )
+        else:
+            data = self._as_map(resp).data
+        return self._with_data(resp, data)
 
     def update(self, user_id: str, **fields: Any) -> ApiResponse[dict[str, Any]]:
         mapping = {
@@ -58,15 +61,17 @@ class UsersResource(Resource):
             if v is None:
                 continue
             body[mapping.get(k, k)] = v
-        return self._as_map(self._post_json(f"/users/{user_id}/update", body=body))
+        return self._as_map(self._post_json(f"/users/{self._segment(user_id)}/update", body=body))
 
     def delete(self, user_id: str) -> ApiResponse[dict[str, Any] | None]:
-        resp = self._post_json(f"/users/{user_id}/delete", body=None, send_json=False)
+        resp = self._post_json(f"/users/{self._segment(user_id)}/delete", body=None, send_json=False)
         if resp.data is None:
-            return ApiResponse(None, resp.code, resp.message, resp.request_id, resp.raw)
-        return self._as_map(resp)
+            data: dict[str, Any] | None = None
+        else:
+            data = self._as_map(resp).data
+        return self._with_data(resp, data)
 
     def update_password(self, user_id: str, *, password: str, **fields: Any) -> ApiResponse[None]:
         body = clean_dict({"password": password, **fields})
-        resp = self._post_json(f"/users/{user_id}/password/update", body=body)
+        resp = self._post_json(f"/users/{self._segment(user_id)}/password/update", body=body)
         return ApiResponse(None, resp.code, resp.message, resp.request_id, resp.raw)

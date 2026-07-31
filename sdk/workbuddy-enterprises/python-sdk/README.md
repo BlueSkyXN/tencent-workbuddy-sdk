@@ -109,7 +109,17 @@ See `examples/`.
 
 ```bash
 python -m pytest tests/unit tests/contract
+python -m ruff check src tests tools examples
+python -m mypy src/workbuddy_enterprise
 ```
+
+Contract tests 优先读取 `WORKBUDDY_OPENAPI_SPEC`，否则读取仓库根
+`local/codebuddy-openapi-api.yaml`。CI 会把官方规范下载到 runner 临时目录后再运行测试。
+校验范围包括 73 个 operation 集合、method/path、全部 query 字段、JSON/multipart 顶层字段、
+request content type、primitive wire type、enum、嵌套 required/声明字段和无 body POST；同时
+对照 Rust CLI registry 的 method/path 与请求字段 metadata。它仍不等同于完整 JSON Schema、
+完整 response schema 或 live 验证。
+若本机没有规范快照，基础 mock smoke 仍会运行，但 YAML 专项检查会显示为 skipped。
 
 Live read-only (optional):
 
@@ -130,4 +140,3 @@ No PyPI publish is configured.
 本仓库要求减少本机磁盘压力；打包优先 CI。详见：
 
 [`docs/local-disk-and-ci-builds.md`](../../../docs/local-disk-and-ci-builds.md)
-

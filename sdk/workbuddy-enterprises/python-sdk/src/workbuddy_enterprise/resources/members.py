@@ -1,11 +1,13 @@
 from __future__ import annotations
 
-from typing import Any, Mapping, Sequence
+from collections.abc import Mapping, Sequence
+from typing import Any
 
+from workbuddy_enterprise._serialization import clean_dict
+from workbuddy_enterprise.errors import WorkBuddyConfigError
 from workbuddy_enterprise.pagination import page_query
 from workbuddy_enterprise.resources._base import Resource
 from workbuddy_enterprise.response import ApiResponse, Page
-from workbuddy_enterprise._serialization import clean_dict
 
 
 class MembersResource(Resource):
@@ -30,9 +32,14 @@ class MembersResource(Resource):
 
         YAML requires body.members[] with at least username + email.
         """
-        payload: dict[str, Any] = {
-            "members": [dict(m) for m in members],
-        }
+        member_payloads = [dict(member) for member in members]
+        for index, member in enumerate(member_payloads):
+            missing = [key for key in ("username", "email") if key not in member]
+            if missing:
+                raise WorkBuddyConfigError(
+                    f"members.add members[{index}] requires: {', '.join(missing)}",
+                )
+        payload: dict[str, Any] = {"members": member_payloads}
         if grant_license is not None:
             payload["grantLicense"] = grant_license
         payload.update(clean_dict(body_fields))

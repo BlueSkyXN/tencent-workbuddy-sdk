@@ -1,8 +1,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, Mapping
+from typing import Any
 
 from workbuddy_enterprise._serialization import as_mapping
 
@@ -26,7 +27,7 @@ class SkillSummary:
     raw: Mapping[str, Any] | None = None
 
     @classmethod
-    def from_mapping(cls, data: Mapping[str, Any]) -> "SkillSummary":
+    def from_mapping(cls, data: Mapping[str, Any]) -> SkillSummary:
         m = as_mapping(data)
         return cls(
             skill_id=m.get("skillId"),
@@ -72,7 +73,7 @@ class SkillDetail:
     raw: Mapping[str, Any] | None = None
 
     @classmethod
-    def from_mapping(cls, data: Mapping[str, Any]) -> "SkillDetail":
+    def from_mapping(cls, data: Mapping[str, Any]) -> SkillDetail:
         m = as_mapping(data)
         return cls(
             skill_id=m.get("skillId"),
