@@ -221,7 +221,7 @@ impl Client {
         let path = self.enterprise_path(suffix);
         let mut url = Url::parse(&format!("{}{}", self.config.base_url, path))
             .map_err(|e| Error::Config(format!("invalid url: {e}")))?;
-        {
+        if query.iter().any(|(_, value)| !value.is_empty()) {
             let mut pairs = url.query_pairs_mut();
             for (k, v) in query {
                 if !v.is_empty() {
